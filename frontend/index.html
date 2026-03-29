@@ -337,9 +337,10 @@
 <!-- FAQ Modal -->
 <div class="modal-overlay" id="faq-modal" onclick="App.closeFaqModal(event)">
   <div class="luxury-modal">
-    <h3 style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 24px;">Configure Knowledge</h3>
+    <h3 id="faq-modal-title" style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 24px;">Configure Knowledge</h3>
     <form id="faq-form" onsubmit="App.saveFaq(event)" style="display: flex; flex-direction: column; gap: 16px;">
       <input type="hidden" id="faq-id" />
+      <input type="hidden" id="faq-priority" value="5" />
       <input type="text" id="faq-question" class="login-input" style="text-align: left;" placeholder="Internal Label" required />
       <input type="text" id="faq-keywords" class="login-input" style="text-align: left;" placeholder="Triggers (comma separated)" required />
       <textarea id="faq-response" class="login-input" style="text-align: left; height: 100px;" placeholder="System Response" required></textarea>
