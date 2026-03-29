@@ -6,69 +6,45 @@
 
 :root {
   /* Layout Constants */
-  --sidebar-w: 280px;
+  --sidebar-w: 260px;
   --right-panel-w: 340px;
   --header-h: 80px;
   --glass-blur: 24px;
-  --radius-xl: 32px;
-  --radius-lg: 20px;
-  --radius-md: 12px;
+  --radius-xl: 24px;
+  --radius-lg: 16px;
+  --radius-md: 10px;
   
   /* Typography */
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Inter', sans-serif;
 
-  /* THEME: LUXURY DARK (Default) */
-  --bg-base: #050508;
-  --bg-surface: #0e0e12;
-  --bg-card: rgba(18, 18, 24, 0.65);
-  --bg-input: rgba(0, 0, 0, 0.4);
+  /* PREMIUM OBSIDIAN PALETTE */
+  --bg-base: #050507;
+  --bg-surface: #0c0c0f;
+  --bg-card: rgba(18, 18, 22, 0.7);
+  --bg-input: #16161a;
   
   --accent: #6366f1; /* Indigo */
-  --accent-secondary: #818cf8;
   --accent-emerald: #10b981;
   --accent-rose: #f43f5e;
-  --accent-amber: #fbbf24;
+  --accent-amber: #f59e0b;
   
-  --secondary: #ffffff;
-  --muted: #94a3b8;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-bright: rgba(255, 255, 255, 0.15);
+  --secondary: #f8fafc;
+  --muted: #64748b;
+  --border: rgba(255, 255, 255, 0.06);
+  --border-bright: rgba(255, 255, 255, 0.12);
   
-  --shadow-sm: 0 2px 10px rgba(0,0,0,0.5);
-  --shadow-md: 0 12px 30px -10px rgba(0,0,0,0.7);
-  --shadow-lg: 0 30px 60px -15px rgba(0,0,0,0.8);
+  /* Layered Shadows */
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.4);
+  --shadow-md: 0 12px 24px -6px rgba(0,0,0,0.6);
+  --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 
-  --blob-1: rgba(99, 102, 241, 0.15);
-  --blob-2: rgba(244, 63, 94, 0.1);
-  --blob-3: rgba(16, 185, 129, 0.1);
-}
-
-/* THEME: STUDIO LIGHT */
-.light-mode {
-  --bg-base: #f8fafc;
-  --bg-surface: #ffffff;
-  --bg-card: rgba(255, 255, 255, 0.8);
-  --bg-input: #f1f5f9;
+  /* Neon Accents */
+  --accent-glow: rgba(99, 102, 241, 0.4);
+  --emerald-glow: rgba(16, 185, 129, 0.3);
+  --rose-glow: rgba(244, 63, 94, 0.3);
   
-  --accent: #4f46e5;
-  --accent-secondary: #6366f1;
-  --accent-emerald: #059669;
-  --accent-rose: #e11d48;
-  --accent-amber: #d97706;
-  
-  --secondary: #0f172a;
-  --muted: #475569;
-  --border: rgba(0, 0, 0, 0.05);
-  --border-bright: rgba(0, 0, 0, 0.1);
-  
-  --shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
-  --shadow-md: 0 12px 30px -10px rgba(0,0,0,0.1);
-  --shadow-lg: 0 30px 60px -15px rgba(0,0,0,0.15);
-
-  --blob-1: rgba(99, 102, 241, 0.08);
-  --blob-2: rgba(244, 63, 94, 0.05);
-  --blob-3: rgba(16, 185, 129, 0.05);
+  --logo-gradient: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
 }
 
 /* ─── Background Design Blobs ─── */
@@ -91,9 +67,9 @@
   animation: blobFloat 20s infinite alternate;
 }
 
-.blob-1 { top: -10%; left: -10%; width: 600px; height: 600px; background: var(--blob-1); filter: blur(120px); border-radius: 50%; opacity: 0.8; }
-.blob-2 { bottom: -10%; right: -10%; width: 500px; height: 500px; background: var(--blob-2); filter: blur(100px); border-radius: 50%; opacity: 0.6; }
-.blob-3 { top: 40%; left: 30%; width: 400px; height: 400px; background: var(--blob-3); filter: blur(80px); border-radius: 50%; opacity: 0.4; }
+.blob-1 { top: -100px; left: -100px; background: var(--accent); }
+.blob-2 { bottom: -100px; right: -100px; background: var(--accent-emerald); opacity: 0.05; }
+.blob-3 { top: 40%; left: 60%; background: var(--accent-rose); opacity: 0.04; width: 300px; height: 300px; }
 
 @keyframes blobFloat {
   from { transform: translate(0, 0) scale(1); }
@@ -254,36 +230,6 @@ body {
 }
 
 .select-input:hover { border-color: var(--border-bright); }
-
-/* ─── Premium Scrollbar ─── */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: var(--bg-base); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; border: 2px solid var(--bg-base); }
-::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-
-/* ─── Button Micro-interactions ─── */
-button:active { transform: scale(0.96) !important; }
-.nav-item:active { transform: scale(0.98); }
-
-.login-btn {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  padding: 14px 28px;
-  border-radius: var(--radius-md);
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px var(--accent-glow);
-}
-
-.login-btn:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.1);
-  box-shadow: 0 8px 20px var(--accent-glow);
-}
 
 /* ═══════════════════════════════════════════════════════════════════════
    BENTO DASHBOARD

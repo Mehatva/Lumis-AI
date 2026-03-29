@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   Lumis AI Dashboard — App Logic
+   ChatIQ Dashboard — App Logic
    ═══════════════════════════════════════════════════════════════════════ */
 
 const API_BASE = "http://localhost:5001";
@@ -120,41 +120,6 @@ function updateSidebarMeta() {
 
 /* ─── Navigation ─── */
 const App = {
-  // ─── Theme Management ───
-  initTheme() {
-    const saved = localStorage.getItem("lumis-theme") || "dark";
-    if (saved === "light") {
-      document.body.classList.add("light-mode");
-      this._updateThemeIcons("light");
-    }
-  },
-
-  toggleTheme() {
-    const isLight = document.body.classList.toggle("light-mode");
-    const theme = isLight ? "light" : "dark";
-    localStorage.setItem("lumis-theme", theme);
-    this._updateThemeIcons(theme);
-    
-    // Re-init charts to pick up new theme colors if needed
-    if (typeof initCharts === "function") initCharts();
-    
-    Toast.show(`Switched to ${theme} mode`, "info");
-  },
-
-  _updateThemeIcons(theme) {
-    const darkIcon = document.getElementById("theme-icon-dark");
-    const lightIcon = document.getElementById("theme-icon-light");
-    if (!darkIcon || !lightIcon) return;
-
-    if (theme === "light") {
-      darkIcon.style.display = "none";
-      lightIcon.style.display = "block";
-    } else {
-      darkIcon.style.display = "block";
-      lightIcon.style.display = "none";
-    }
-  },
-
   _currentPage: "dashboard",
 
   navigate(page) {
@@ -734,7 +699,7 @@ const App = {
     // Simulate or call real endpoint
     await new Promise(r => setTimeout(r, 2000));
     if (icon) icon.style.animation = "";
-    Toast.show("✅ AI Optimized! Lumis AI is perfectly tuned for your brand's voice.", "success");
+    Toast.show("✅ AI Optimized! Responses now perfectly aligned with your Knowledge Base.", "success");
   },
 
   /* ─── VISUALS ─── */
@@ -853,13 +818,9 @@ function initCharts() {
   if (window.accChart && typeof window.accChart.destroy === 'function') window.accChart.destroy();
   if (window.leadsChart && typeof window.leadsChart.destroy === 'function') window.leadsChart.destroy();
 
-  // ── Dynamic theme extraction ──────────────────────────────────────────
-  const style = getComputedStyle(document.body);
-  const gridColor = style.getPropertyValue('--border').trim() || 'rgba(255,255,255,0.05)';
-  const tickColor = style.getPropertyValue('--muted').trim() || 'rgba(255,255,255,0.3)';
-  const accentColor = style.getPropertyValue('--accent').trim() || '#6366f1';
-  const emeraldColor = style.getPropertyValue('--accent-emerald').trim() || '#10b981';
-  const secondaryColor = style.getPropertyValue('--secondary').trim() || '#fff';
+  // ── Shared theme ──────────────────────────────────────────────────────
+  const gridColor = 'rgba(255,255,255,0.05)';
+  const tickColor = 'rgba(255,255,255,0.3)';
   const font      = { family: "'Inter', sans-serif", size: 11 };
 
   // ── Gradient helper ───────────────────────────────────────────────────
@@ -879,13 +840,13 @@ function initCharts() {
         {
           label: 'Accuracy %',
           data: [92.1, 94.3, 93.0, 95.8, 96.2, 97.7, 98.4],
-          borderColor: accentColor,
-          backgroundColor: makeGrad(ctxAcc, accentColor.replace('1)', '0.2)'), 'rgba(0,0,0,0)'),
+          borderColor: '#6366f1',
+          backgroundColor: makeGrad(ctxAcc, 'rgba(99,102,241,0.25)', 'rgba(99,102,241,0)'),
           tension: 0.45,
           fill: true,
           pointRadius: 5,
-          pointBackgroundColor: accentColor,
-          pointBorderColor: secondaryColor,
+          pointBackgroundColor: '#6366f1',
+          pointBorderColor: '#fff',
           pointBorderWidth: 2,
           pointHoverRadius: 7,
           borderWidth: 2.5
@@ -893,7 +854,7 @@ function initCharts() {
         {
           label: 'Target',
           data: [95, 95, 95, 95, 95, 95, 95],
-          borderColor: emeraldColor + '66',
+          borderColor: 'rgba(16,185,129,0.4)',
           borderDash: [6, 4],
           borderWidth: 1.5,
           pointRadius: 0,
@@ -913,10 +874,10 @@ function initCharts() {
           labels: { color: tickColor, font, boxWidth: 12, usePointStyle: true, pointStyleWidth: 8 }
         },
         tooltip: {
-          backgroundColor: style.getPropertyValue('--bg-surface').trim() || 'rgba(15,15,20,0.95)',
-          borderColor: accentColor + '4d',
+          backgroundColor: 'rgba(15,15,20,0.95)',
+          borderColor: 'rgba(99,102,241,0.3)',
           borderWidth: 1,
-          titleColor: secondaryColor,
+          titleColor: '#fff',
           bodyColor: tickColor,
           padding: 12,
           callbacks: {
@@ -1026,11 +987,6 @@ window.App = App;
 
 /* ─── Boot ─── */
 document.addEventListener("DOMContentLoaded", async () => {
-  App.initTheme();
-  
-  // Re-run Lucide after theme change might have added new icons
-  if (typeof lucide !== 'undefined') lucide.createIcons();
-
   if (!App.checkAuth()) return;
 
   document.querySelectorAll(".nav-item").forEach((el) => {
