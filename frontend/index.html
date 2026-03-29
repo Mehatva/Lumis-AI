@@ -216,36 +216,42 @@
 
   <!-- ─── PAGE: KNOWLEDGE BASE (FAQs) ─── -->
   <section class="page" id="page-faqs">
-    <div style="display: flex; flex-direction: column; gap: 32px; margin-bottom: 48px;">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
+    <div style="display: flex; flex-direction: column; gap: 40px; margin-bottom: 56px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
         <div>
-          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--muted); font-weight: 700; letter-spacing: 0.05em; margin-bottom: 6px;">AI Intelligence</div>
-          <h2 style="font-family: var(--font-heading); font-size: 2rem;">FAQ Manager</h2>
+          <h1 style="font-family: var(--font-heading); font-size: 2.4rem; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.02em;">FAQ Manager</h1>
+          <h2 style="font-family: var(--font-heading); font-size: 1.5rem; color: #fff; opacity: 0.9; font-weight: 700;">Knowledge Base</h2>
         </div>
-        <div style="display: flex; gap: 12px;">
-           <button class="login-btn" style="width: auto; padding: 0 24px; background: rgba(99, 102, 241, 0.1); border: 1px solid var(--accent); color: var(--accent);" onclick="App.openImportModal()">✨ Magic Import</button>
-           <button class="login-btn" style="width: auto; padding: 0 32px; background: var(--accent);" onclick="App.openFaqModal()">+ Create FAQ</button>
+        <div style="display: flex; gap: 16px; align-items: center; padding-top: 12px;">
+           <button class="login-btn" style="width: auto; padding: 0 28px; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.3); color: var(--accent); font-weight: 600;" onclick="App.openImportModal()">✨ Magic Import</button>
+           <button class="login-btn" style="width: auto; padding: 0 32px; background: var(--accent); font-weight: 700;" onclick="App.openFaqModal()">+ Create FAQ</button>
         </div>
       </div>
 
       <!-- Search & Overview Stats -->
-      <div style="display: grid; grid-template-columns: 1fr 300px; gap: 24px;">
-        <div style="display: flex; gap: 16px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: var(--radius-lg); border: 1px solid rgba(255,255,255,0.08);">
-          <div style="flex: 1; position: relative;">
-            <i data-lucide="search" style="position: absolute; left: 16px; top: 12px; width: 18px; height: 18px; color: var(--muted);"></i>
+      <div style="display: grid; grid-template-columns: 1fr 320px; gap: 32px; align-items: center;">
+        <div style="display: flex; gap: 16px; background: rgba(255,255,255,0.02); padding: 14px 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); transition: all 0.3s ease;">
+          <div style="flex: 1; position: relative; display: flex; align-items: center;">
+            <i data-lucide="search" style="position: absolute; left: 0; width: 20px; height: 20px; color: var(--muted);"></i>
             <input type="text" placeholder="Search knowledge base by question, keyword, or response..." 
                    oninput="App.filterFaqs(this.value)"
-                   style="width: 100%; background: transparent; border: none; padding: 10px 10px 10px 48px; color: var(--secondary); font-size: 0.95rem; outline: none;" />
+                   style="width: 100%; background: transparent; border: none; padding: 8px 8px 8px 40px; color: #fff; font-size: 1rem; outline: none;" />
           </div>
         </div>
-        <div style="display: flex; align-items: center; justify-content: space-around; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.08); border-radius: var(--radius-lg); padding: 0 16px;">
-           <div style="text-align: center;"><div style="font-size: 0.7rem; color: var(--muted); text-transform: uppercase;">Total</div><div style="font-weight: 700; color: #fff;" id="kb-total">5</div></div>
-           <div style="text-align: center;"><div style="font-size: 0.7rem; color: var(--muted); text-transform: uppercase;">Active</div><div style="font-weight: 700; color: var(--accent-emerald);">100%</div></div>
+        <div style="display: flex; align-items: center; justify-content: space-around; background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1); border-radius: 16px; height: 72px;">
+           <div style="text-align: center; border-right: 1px solid rgba(255,255,255,0.05); padding: 0 24px;">
+              <div style="font-size: 0.65rem; color: var(--muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.1em; margin-bottom: 4px;">Total</div>
+              <div style="font-size: 1.25rem; font-weight: 800; color: #fff;" id="kb-total">5</div>
+           </div>
+           <div style="text-align: center; padding: 0 24px;">
+              <div style="font-size: 0.65rem; color: var(--muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.1em; margin-bottom: 4px;">Active</div>
+              <div style="font-size: 1.25rem; font-weight: 800; color: var(--accent-emerald);">100%</div>
+           </div>
         </div>
       </div>
     </div>
 
-    <div class="dashboard-bento" id="faqs-grid">
+    <div class="dashboard-bento" id="faqs-grid" style="grid-template-columns: repeat(2, 1fr); gap: 32px;">
        <!-- Dynamic content here -->
     </div>
   </section>

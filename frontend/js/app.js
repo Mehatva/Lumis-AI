@@ -218,32 +218,34 @@ const App = {
 
   _faqCard(f) {
     const keywords = (f.keywords || []).slice(0, 4);
-    const tags = keywords.map((k) => `<span style="font-size: 0.75rem; color: var(--muted); background: rgba(255,255,255,0.04); padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">${escape(k)}</span>`).join("");
+    const tags = keywords.map((k) => `<span style="font-size: 0.7rem; color: var(--muted); background: rgba(255,255,255,0.04); padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); letter-spacing: 0.02em;">${escape(k)}</span>`).join("");
     const priorityColor = f.priority >= 9 ? '#f43f5e' : f.priority >= 7 ? '#6366f1' : '#636366';
     
     // Format the response with proper markdown processing
     const rawResponse = f.response || "";
     const formattedResponse = rawResponse
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
-      .replace(/\*([^*]+)\*/g, '<b>$1</b>')
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: var(--accent); text-decoration: underline;">$1</a>')
+      .replace(/\*\*([^*]+)\*\*/g, '<b style="color:#fff;">$1</b>')
+      .replace(/\*([^*]+)\*/g, '<b style="color:#fff;">$1</b>')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: var(--accent); text-decoration: none; border-bottom: 1px dashed var(--accent);">$1</a>')
       .replace(/\n/g, '<br>');
 
     return `
-      <div class="bento-card faq-luxury-card accent-glow" id="faq-card-${f.id}" style="padding: 40px; gap: 0;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
-           <div class="faq-q" style="font-family: var(--font-heading); font-weight: 700; color: #fff; font-size: 1.25rem; line-height: 1.4; max-width: 85%;">${escape(f.question)}</div>
-           <div style="font-size: 0.7rem; color: ${priorityColor}; font-weight: 900; background: ${priorityColor}15; padding: 4px 10px; border-radius: 6px; border: 1px solid ${priorityColor}33; text-transform: uppercase; letter-spacing: 0.05em;">P${f.priority}</div>
+      <div class="bento-card faq-luxury-card" id="faq-card-${f.id}" style="padding: 44px; background: rgba(10,10,15,0.6); position: relative; display: flex; flex-direction: column; height: 100%;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+           <div class="faq-q" style="font-family: var(--font-heading); font-weight: 800; color: #fff; font-size: 1.4rem; line-height: 1.3; max-width: 80%; letter-spacing: -0.01em;">${escape(f.question)}</div>
+           <div style="font-size: 0.65rem; color: ${priorityColor}; font-weight: 900; background: ${priorityColor}15; padding: 5px 10px; border-radius: 6px; border: 1px solid ${priorityColor}33; text-transform: uppercase; letter-spacing: 0.08em; flex-shrink: 0;">P${f.priority}</div>
         </div>
         
-        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 32px;">${tags}</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px;">${tags}</div>
         
-        <div class="faq-a" style="font-family: var(--font-body); color: var(--secondary); font-size: 1rem; line-height: 1.8; flex: 1; opacity: 0.95;">${formattedResponse}</div>
+        <div class="faq-a" style="font-family: var(--font-body); color: #8a8a93; font-size: 1.05rem; line-height: 1.8; flex: 1; font-weight: 450;">
+          ${formattedResponse}
+        </div>
         
-        <div style="display: flex; gap: 16px; margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06);">
-           <button class="login-btn" style="background: rgba(255,255,255,0.03); color: #fff; border: 1px solid rgba(255,255,255,0.1); width: auto; padding: 0 24px; font-size: 0.85rem; height: 40px;" onclick="App.openFaqModal(${f.id})">Edit Entry</button>
-           <button class="login-btn" style="background: transparent; border: 1px solid rgba(244, 63, 94, 0.1); color: #f43f5e; width: auto; padding: 0 24px; font-size: 0.85rem; height: 40px;" onclick="App.deleteFaq(${f.id})">Remove</button>
+        <div style="display: flex; gap: 12px; margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 24px;">
+           <button class="login-btn" style="background: rgba(255,255,255,0.03); color: #fff; border: 1px solid rgba(255,255,255,0.06); width: auto; padding: 0 20px; font-size: 0.8rem; height: 38px; border-radius: 10px;" onclick="App.openFaqModal(${f.id})">Edit</button>
+           <button class="login-btn" style="background: transparent; border: 1px solid rgba(244, 63, 94, 0.08); color: #f43f5e; width: auto; padding: 0 20px; font-size: 0.8rem; height: 38px; border-radius: 10px;" onclick="App.deleteFaq(${f.id})">Remove</button>
         </div>
       </div>`;
   },

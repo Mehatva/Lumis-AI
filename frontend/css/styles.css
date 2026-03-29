@@ -261,6 +261,20 @@ body {
 .bento-card.accent-emerald:hover { box-shadow: 0 20px 40px -20px var(--emerald-glow); border-color: var(--accent-emerald); }
 .bento-card.accent-rose:hover { box-shadow: 0 20px 40px -20px var(--rose-glow); border-color: var(--accent-rose); }
 
+.faq-luxury-card {
+  background: rgba(10, 10, 15, 0.7) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.5);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.faq-luxury-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  border-color: rgba(99, 102, 241, 0.3) !important;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6), 0 0 20px -5px rgba(99, 102, 241, 0.1);
+}
+
 /* Sizes */
 .col-2 { grid-column: span 2; }
 .row-2 { grid-row: span 2; }
