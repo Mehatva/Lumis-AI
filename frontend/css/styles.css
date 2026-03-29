@@ -46,10 +46,10 @@
 
 /* THEME: STUDIO LIGHT */
 .light-mode {
-  --bg-base: #f8fafc;
+  --bg-base: #f1f3f9;
   --bg-surface: #ffffff;
-  --bg-card: rgba(255, 255, 255, 0.8);
-  --bg-input: #f1f5f9;
+  --bg-card: rgba(255, 255, 255, 0.7);
+  --bg-input: #ffffff;
   
   --accent: #4f46e5;
   --accent-secondary: #6366f1;
@@ -57,19 +57,52 @@
   --accent-rose: #e11d48;
   --accent-amber: #d97706;
   
-  --secondary: #0f172a;
-  --muted: #475569;
-  --border: rgba(0, 0, 0, 0.05);
-  --border-bright: rgba(0, 0, 0, 0.1);
+  --secondary: #1e293b;
+  --muted: #64748b;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-bright: rgba(0, 0, 0, 0.15);
   
-  --shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
-  --shadow-md: 0 12px 30px -10px rgba(0,0,0,0.1);
-  --shadow-lg: 0 30px 60px -15px rgba(0,0,0,0.15);
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.04);
+  --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.08);
+  --shadow-lg: 0 25px 50px -12px rgba(0,0,0,0.1);
 
-  --blob-1: rgba(99, 102, 241, 0.08);
-  --blob-2: rgba(244, 63, 94, 0.05);
-  --blob-3: rgba(16, 185, 129, 0.05);
+  --blob-1: rgba(79, 70, 229, 0.08);
+  --blob-2: rgba(225, 29, 72, 0.05);
+  --blob-3: rgba(5, 150, 105, 0.05);
 }
+
+.light-mode .bento-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.light-mode .faq-luxury-card {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: transparent !important;
+  box-shadow: 0 10px 40px -15px rgba(0, 0, 0, 0.08) !important;
+}
+
+.light-mode .faq-luxury-card:hover {
+  border-color: var(--accent) !important;
+  box-shadow: 0 20px 50px -20px rgba(79, 70, 229, 0.15) !important;
+}
+
+.light-mode .login-input, 
+.light-mode .select-input {
+  background: #ffffff !important;
+  border-color: var(--border) !important;
+  color: var(--secondary) !important;
+}
+
+.light-mode .nav-item { color: var(--muted); }
+.light-mode .nav-item.active { color: var(--accent); background: rgba(79, 70, 229, 0.05); }
+
+.light-mode .page-title { color: var(--secondary); }
+.light-mode .sidebar { background: #ffffff; border-right: 1px solid var(--border); }
+.light-mode .sidebar-header { border-bottom-color: var(--border) !important; }
+.light-mode .logo-name { background: linear-gradient(to bottom right, #1e293b, #64748b) !important; -webkit-background-clip: text !important; }
+
 
 /* ─── Background Design Blobs ─── */
 .bg-blobs {
