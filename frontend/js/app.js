@@ -218,9 +218,18 @@ const App = {
 
   _faqCard(f) {
     const keywords = (f.keywords || []).slice(0, 4);
-    const tags = keywords.map((k) => `<span style="font-size: 0.75rem; color: var(--muted); background: rgba(255,255,255,0.04); padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">${k}</span>`).join("");
+    const tags = keywords.map((k) => `<span style="font-size: 0.75rem; color: var(--muted); background: rgba(255,255,255,0.04); padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">${escape(k)}</span>`).join("");
     const priorityColor = f.priority >= 9 ? '#f43f5e' : f.priority >= 7 ? '#6366f1' : '#636366';
     
+    // Format the response with proper markdown processing
+    const rawResponse = f.response || "";
+    const formattedResponse = rawResponse
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+      .replace(/\*([^*]+)\*/g, '<b>$1</b>')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: var(--accent); text-decoration: underline;">$1</a>')
+      .replace(/\n/g, '<br>');
+
     return `
       <div class="bento-card faq-luxury-card accent-glow" id="faq-card-${f.id}" style="padding: 40px; gap: 0;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
@@ -230,9 +239,7 @@ const App = {
         
         <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 32px;">${tags}</div>
         
-        <div class="faq-a" style="font-family: var(--font-body); color: var(--secondary); font-size: 1rem; line-height: 1.7; flex: 1; opacity: 0.9;">
-          ${formatText(escape(f.response))}
-        </div>
+        <div class="faq-a" style="font-family: var(--font-body); color: var(--secondary); font-size: 1rem; line-height: 1.8; flex: 1; opacity: 0.95;">${formattedResponse}</div>
         
         <div style="display: flex; gap: 16px; margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06);">
            <button class="login-btn" style="background: rgba(255,255,255,0.03); color: #fff; border: 1px solid rgba(255,255,255,0.1); width: auto; padding: 0 24px; font-size: 0.85rem; height: 40px;" onclick="App.openFaqModal(${f.id})">Edit Entry</button>
@@ -614,11 +621,13 @@ const App = {
     
     const scenarioMsg = [
       { sender: "User", text: "Hey! What's your pricing?" },
-      { sender: "AI", text: "Hi there! Our plans start at ₹999/month. Would you like to see the breakdown?" },
-      { sender: "User", text: "Yes, and are you open on Sundays?" },
-      { sender: "AI", text: "Absolutely! We're open 8am-6pm on Sundays. ⏰" },
-      { sender: "User", text: "Great, I'll visit today." },
-      { sender: "AI", text: "Awesome! I've flagged a specialist to help you when you arrive. See you soon! 🏃‍♂️" }
+      { sender: "AI",   text: "Hi there! 👋 Our plans start at ₹999/month. Would you like to see the full breakdown?" },
+      { sender: "User", text: "Yes, please show me the breakdown!" },
+      { sender: "AI",   text: "💰 <b>FlexZone Membership Plans:</b><br><br>🥉 <b>Basic</b> — ₹999/month<br>✅ Gym access (6am–10pm) ✅ Locker room<br><br>🥈 <b>Standard</b> — ₹1,499/month<br>✅ Everything in Basic ✅ 2 Group classes/week ✅ Diet consultation<br><br>🥇 <b>Premium</b> — ₹2,499/month<br>✅ Personal trainer (3x/week) ✅ Unlimited classes<br><br>Want to book a <b>free trial</b>? 🎯" },
+      { sender: "User", text: "Great! Are you open on Sundays?" },
+      { sender: "AI",   text: "Absolutely! ⏰ We're open <b>8:00 AM – 6:00 PM</b> every Sunday. See you there! 💪" },
+      { sender: "User", text: "Perfect, I'll visit this Sunday!" },
+      { sender: "AI",   text: "Amazing! 🎉 I've flagged your visit for our team. A specialist will be ready to help you the moment you walk in. See you soon! 🎯" }
     ];
     
     const delay = ms => new Promise(res => setTimeout(res, ms));
