@@ -813,49 +813,155 @@ function initCharts() {
   const ctxLeads = document.getElementById('leadsChart');
   if (!ctxAcc || !ctxLeads) return;
 
-  // Defensive check before destroying to avoid runtime errors
   if (window.accChart && typeof window.accChart.destroy === 'function') window.accChart.destroy();
   if (window.leadsChart && typeof window.leadsChart.destroy === 'function') window.leadsChart.destroy();
 
+  // ── Shared theme ──────────────────────────────────────────────────────
+  const gridColor = 'rgba(255,255,255,0.05)';
+  const tickColor = 'rgba(255,255,255,0.3)';
+  const font      = { family: "'Inter', sans-serif", size: 11 };
+
+  // ── Gradient helper ───────────────────────────────────────────────────
+  const makeGrad = (ctx, color1, color2) => {
+    const g = ctx.getContext('2d').createLinearGradient(0, 0, 0, ctx.offsetHeight || 300);
+    g.addColorStop(0, color1);
+    g.addColorStop(1, color2);
+    return g;
+  };
+
+  // ── CHART 1: Response Accuracy Trend ─────────────────────────────────
   window.accChart = new Chart(ctxAcc, {
     type: 'line',
     data: {
       labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      datasets: [{
-        label: 'Accuracy %',
-        data: [92, 94, 93, 96, 95, 98, 98.4],
-        borderColor: '#6366f1',
-        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-        tension: 0.4,
-        fill: true,
-        pointRadius: 0,
-        borderWidth: 3
-      }]
+      datasets: [
+        {
+          label: 'Accuracy %',
+          data: [92.1, 94.3, 93.0, 95.8, 96.2, 97.7, 98.4],
+          borderColor: '#6366f1',
+          backgroundColor: makeGrad(ctxAcc, 'rgba(99,102,241,0.25)', 'rgba(99,102,241,0)'),
+          tension: 0.45,
+          fill: true,
+          pointRadius: 5,
+          pointBackgroundColor: '#6366f1',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointHoverRadius: 7,
+          borderWidth: 2.5
+        },
+        {
+          label: 'Target',
+          data: [95, 95, 95, 95, 95, 95, 95],
+          borderColor: 'rgba(16,185,129,0.4)',
+          borderDash: [6, 4],
+          borderWidth: 1.5,
+          pointRadius: 0,
+          fill: false,
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: { x: { display: false }, y: { display: false } }
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          align: 'end',
+          labels: { color: tickColor, font, boxWidth: 12, usePointStyle: true, pointStyleWidth: 8 }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(15,15,20,0.95)',
+          borderColor: 'rgba(99,102,241,0.3)',
+          borderWidth: 1,
+          titleColor: '#fff',
+          bodyColor: tickColor,
+          padding: 12,
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y}%`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: gridColor },
+          ticks: { color: tickColor, font }
+        },
+        y: {
+          min: 88,
+          max: 100,
+          grid: { color: gridColor },
+          ticks: {
+            color: tickColor,
+            font,
+            callback: v => v + '%',
+            stepSize: 4
+          },
+          border: { dash: [4, 4] }
+        }
+      }
     }
   });
 
+  // ── CHART 2: Weekly Leads ─────────────────────────────────────────────
   window.leadsChart = new Chart(ctxLeads, {
     type: 'bar',
     data: {
-      labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-      datasets: [{
-        label: 'Leads',
-        data: [4, 7, 5, 8, 12, 15, 12],
-        backgroundColor: '#10b981',
-        borderRadius: 4
-      }]
+      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      datasets: [
+        {
+          label: 'New Leads',
+          data: [4, 7, 5, 8, 12, 15, 12],
+          backgroundColor: makeGrad(ctxLeads, 'rgba(16,185,129,0.8)', 'rgba(16,185,129,0.2)'),
+          borderColor: '#10b981',
+          borderWidth: 1,
+          borderRadius: 6,
+          borderSkipped: false,
+        },
+        {
+          label: 'Converted',
+          data: [2, 3, 2, 4, 6, 8, 5],
+          backgroundColor: makeGrad(ctxLeads, 'rgba(99,102,241,0.7)', 'rgba(99,102,241,0.15)'),
+          borderColor: '#6366f1',
+          borderWidth: 1,
+          borderRadius: 6,
+          borderSkipped: false,
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: { x: { display: false }, y: { display: false } }
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          align: 'end',
+          labels: { color: tickColor, font, boxWidth: 12, usePointStyle: true, pointStyleWidth: 8 }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(15,15,20,0.95)',
+          borderColor: 'rgba(16,185,129,0.3)',
+          borderWidth: 1,
+          titleColor: '#fff',
+          bodyColor: tickColor,
+          padding: 12,
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'transparent' },
+          ticks: { color: tickColor, font }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: gridColor },
+          ticks: { color: tickColor, font, stepSize: 4 },
+          border: { dash: [4, 4] }
+        }
+      }
     }
   });
 }
