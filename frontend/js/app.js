@@ -2,7 +2,7 @@
    ChatIQ Dashboard — App Logic
    ═══════════════════════════════════════════════════════════════════════ */
 
-const API_BASE = "";
+const API_BASE = "http://localhost:5001";
 
 /* ─── State ─── */
 const State = {
