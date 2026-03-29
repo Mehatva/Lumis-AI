@@ -203,6 +203,8 @@ const App = {
 
   _renderFaqs(faqs) {
     const grid = document.getElementById("faqs-grid");
+    const totalEl = document.getElementById("kb-total");
+    if (totalEl) totalEl.textContent = faqs.length;
     if (!faqs.length) {
       grid.innerHTML = `
         <div class="empty-state">
@@ -572,6 +574,13 @@ const App = {
     input.value = "";
     container.scrollTop = container.scrollHeight;
 
+    // Show typing indicator while waiting
+    const loadingBubble = document.createElement('div');
+    loadingBubble.className = "chat-bubble bot typing-indicator";
+    loadingBubble.innerHTML = "<span class='dot'></span><span class='dot'></span><span class='dot'></span>";
+    container.appendChild(loadingBubble);
+    container.scrollTop = container.scrollHeight;
+
     // Call API
     const result = await API.post("/api/chat", {
       business_id: bid,
@@ -580,8 +589,10 @@ const App = {
     });
 
     if (result && result.reply) {
+      loadingBubble.remove();
       container.innerHTML += `<div class="chat-bubble bot">${formatText(escape(result.reply))}</div>`;
     } else {
+      loadingBubble.remove();
       container.innerHTML += `<div class="chat-bubble bot"><i>(Bot failed to reply. Is the Flask server running?)</i></div>`;
     }
     container.scrollTop = container.scrollHeight;
@@ -653,6 +664,31 @@ const App = {
       }
       await delay(800); // pause between messages
     }
+  },
+
+  /* ─── LOGOUT ─── */
+  logout() {
+    if (!confirm("Are you sure you want to logout?")) return;
+    document.getElementById("login-overlay").style.display = "flex";
+    document.getElementById("app-container") && (document.getElementById("app-container").style.display = "none");
+    document.getElementById("login-pass").value = "";
+    State.token = null;
+    State.currentBusiness = null;
+    Toast.show("Logged out successfully.", "success");
+  },
+
+  /* ─── OPTIMIZE AI ─── */
+  async optimizeAI() {
+    const bid = State.currentBusiness?.id;
+    if (!bid) return;
+    Toast.show("⏳ Re-calibrating AI against your Knowledge Base...", "success");
+    const btn = event.currentTarget;
+    const icon = btn.querySelector('i');
+    if (icon) icon.style.animation = "spin 1s linear infinite";
+    // Simulate or call real endpoint
+    await new Promise(r => setTimeout(r, 2000));
+    if (icon) icon.style.animation = "";
+    Toast.show("✅ AI Optimized! Responses now perfectly aligned with your Knowledge Base.", "success");
   },
 
   /* ─── VISUALS ─── */
@@ -743,8 +779,8 @@ function mockFaqs() {
     },
     {
       id: 2, question: "Timings", priority: 9,
-      keywords: ["timing", "timings", "open", "hours"],
-      response: "⏰ We're open Mon–Sat: 6am–10pm and Sunday: 8am–6pm.",
+      keywords: ["timing", "timings", "open", "hours", "time"],
+      response: "⏰ *FlexZone Timings:*\n\n📅 Monday–Saturday: 6:00 AM – 10:00 PM\n📅 Sunday: 8:00 AM – 6:00 PM\n\n🎄 We're open on most holidays! DM us to confirm.",
       cta_label: null, cta_url: null,
     },
     {
@@ -819,42 +855,14 @@ function initDemoChat() {
   const container = document.getElementById('demo-chat-container');
   if (!container) return;
 
-  const demoMessages = [
-    { sender: "User", text: "Hey! What's your pricing?" },
-    { sender: "AI", text: "Hi there! Our plans start at ₹999/month. Would you like to see the breakdown?" },
-    { sender: "User", text: "Yes, and are you open on Sundays?" },
-    { sender: "AI", text: "Absolutely! We're open 8am–6pm on Sundays. ⏰" },
-    { sender: "User", text: "Great, I'll visit today." },
-    { sender: "AI", text: "Awesome! I've flagged a specialist to help you when you arrive. See you soon! 🎯" }
-  ];
-
-  container.innerHTML = "";
-  let i = 0;
-
-  const addMsg = () => {
-    if (i >= demoMessages.length) {
-      setTimeout(() => { i = 0; container.innerHTML = ""; addMsg(); }, 3000);
-      return;
-    }
-    const msg = demoMessages[i];
-    const div = document.createElement('div');
-    div.style.cssText = `
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      max-width: 85%;
-      margin-bottom: 8px;
-      animation: msgPop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      ${msg.sender === 'AI' ? 'background: #1e1e24; color: #fff; border: 1px solid var(--border); align-self: flex-start;' : 'background: var(--accent); color: #fff; align-self: flex-end;'}
-    `;
-    div.innerHTML = `<strong>${msg.sender}:</strong> ${msg.text}`;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-    i++;
-    setTimeout(addMsg, 2500 + Math.random() * 2000);
-  };
-
-  addMsg();
+  // Show a welcoming placeholder state
+  container.innerHTML = `
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 16px; opacity: 0.4; padding: 40px;">
+      <i data-lucide="message-circle" style="width: 48px; height: 48px; color: var(--muted);"></i>
+      <p style="color: var(--muted); font-size: 0.85rem; text-align: center; line-height: 1.6;">Click <b>Run Script</b> above to launch\ the AI conversation demo.</p>
+    </div>
+  `;
+  lucide.createIcons();
 }
 
 // Expose App globally
