@@ -76,7 +76,7 @@
     </nav>
 
     <!-- User Profile Section -->
-    <div class="sidebar-footer" style="margin-top: auto; padding-top: 24px; border-top: 1px solid var(--border);">
+    <div class="sidebar-footer" style="margin-top: auto; padding: 24px; padding-bottom: 40px; border-top: 1px solid var(--border);">
       <div style="display: flex; align-items: center; gap: 12px; padding: 0 8px;">
         <div style="width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent-emerald)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-size: 0.8rem;">AA</div>
         <div style="flex: 1; min-width: 0;">
@@ -114,7 +114,7 @@
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
           <div>
             <div class="stat-label" style="color: var(--accent-rose); font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">Urgent: Needs Attention</div>
-            <div class="stat-value" id="stat-attention" style="color: var(--accent-rose); font-size: 3.5rem; letter-spacing: -0.02em;">0</div>
+            <div class="stat-value" id="stat-attention" style="color: var(--accent-rose); font-size: 2.5rem; letter-spacing: -0.02em;">0</div>
             <div class="stat-trend" style="color: var(--muted); font-size: 0.9rem; margin-top: 12px;">High-priority inquiries awaiting human handoff.</div>
           </div>
           <div style="padding: 16px; background: rgba(244, 63, 94, 0.1); border-radius: 12px; color: var(--accent-rose);">
@@ -234,13 +234,13 @@
       <div style="display: grid; grid-template-columns: 1fr 320px; gap: 32px; align-items: center;">
         <div style="display: flex; gap: 16px; background: rgba(255,255,255,0.02); padding: 14px 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); transition: all 0.3s ease;">
           <div style="flex: 1; position: relative; display: flex; align-items: center;">
-            <i data-lucide="search" style="position: absolute; left: 0; width: 20px; height: 20px; color: var(--muted);"></i>
+            <i data-lucide="search" style="position: absolute; left: 0; width: 22px; height: 22px; color: var(--muted);"></i>
             <input type="text" placeholder="Search knowledge base by question, keyword, or response..." 
                    oninput="App.filterFaqs(this.value)"
                    style="width: 100%; background: transparent; border: none; padding: 8px 8px 8px 40px; color: #fff; font-size: 1rem; outline: none;" />
           </div>
         </div>
-        <div style="display: flex; align-items: center; justify-content: space-around; background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1); border-radius: 16px; height: 72px;">
+        <div class="faq-priority-stat" style="display: flex; align-items: center; justify-content: space-around; background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1); border-radius: 16px; height: 72px;">
            <div style="text-align: center; border-right: 1px solid rgba(255,255,255,0.05); padding: 0 24px;">
               <div style="font-size: 0.65rem; color: var(--muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.1em; margin-bottom: 4px;">Total</div>
               <div style="font-size: 1.25rem; font-weight: 800; color: #fff;" id="kb-total">5</div>
@@ -263,7 +263,7 @@
     <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 32px;">
        <div style="display: flex; gap: 12px; align-items: center;">
          <div style="position: relative;">
-           <i data-lucide="search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--muted);"></i>
+           <i data-lucide="search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--muted);"></i>
            <input type="text" placeholder="Search leads..." oninput="App.filterLeads(this.value)" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 16px 10px 40px; color: #fff; font-size: 0.875rem; outline: none; width: 240px;">
          </div>
          <button class="login-btn" style="width: auto; padding: 0 32px; background: transparent; border: 1px solid var(--border); color: #fff;" onclick="App.exportLeads()">Export CSV</button>
