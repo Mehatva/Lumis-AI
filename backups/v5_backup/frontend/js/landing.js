@@ -2,7 +2,7 @@
    LUMIS AI — LANDING PAGE LOGIC
    ═══════════════════════════════════════════════════════════════════════ */
 
-const API_BASE = "http://localhost:5001";
+const API_BASE = window.location.origin;
 
 // ─── UTILITIES ───
 const Toast = {
@@ -60,10 +60,11 @@ const App = {
             });
             const result = await r.json();
 
-            if (r.ok) {
-                Toast.show("Account created! Please check your email for the verification link. 📧", "warning");
-                // Do not redirect or log in automatically yet if verification is required
-                this.toggleAuthMode('login');
+            if (r.ok && result.access_token) {
+                sessionStorage.setItem("chatiq_token", result.access_token);
+                sessionStorage.setItem("chatiq_user", JSON.stringify(result.user));
+                Toast.show(`Welcome, ${result.user.name}! 👋`);
+                setTimeout(() => window.location.href = "/dashboard", 1000);
             } else {
                 errEl.textContent = result.error || "Signup failed.";
             }
@@ -88,10 +89,6 @@ const App = {
             const result = await r.json();
 
             if (r.ok && result.access_token) {
-                if (result.user && result.user.is_verified === false) {
-                    Toast.show("Please verify your email to log in.", "warning");
-                    return;
-                }
                 sessionStorage.setItem("chatiq_token", result.access_token);
                 sessionStorage.setItem("chatiq_user", JSON.stringify(result.user));
                 Toast.show("Welcome back!");
@@ -144,20 +141,6 @@ const App = {
             }
         } catch (e) {
             errEl.textContent = "Server unreachable.";
-        }
-    },
-
-    async socialLogin(provider) {
-        const errEl = document.getElementById("login-error");
-        errEl.textContent = "";
-        
-        Toast.show(`${provider.charAt(0).toUpperCase() + provider.slice(1)} integration is in Demo Mode.`, "warning");
-        
-        // Stubs for future implementation
-        if (provider === 'apple') {
-            console.log("Apple Login Triggered");
-        } else if (provider === 'instagram') {
-            console.log("Instagram Login Triggered");
         }
     }
 };

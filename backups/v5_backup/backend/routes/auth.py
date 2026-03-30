@@ -4,7 +4,6 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from models import db
 from models.user import User
-import uuid
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -24,14 +23,8 @@ def signup():
     user = User(email=email, name=name)
     user.set_password(password)
     
-    # Generate verification token
-    user.verification_token = str(uuid.uuid4())
-    
     db.session.add(user)
     db.session.commit()
-
-    # MOCK EMAIL: Log verification link to terminal
-    print(f"\n[MOCK EMAIL] Verification Link: http://localhost:5001/api/auth/verify-email/{user.verification_token}\n")
 
     access_token = create_access_token(identity=str(user.id))
     return jsonify({
@@ -118,26 +111,3 @@ def google_login():
         return jsonify({"error": f"Invalid Google token: {str(e)}"}), 401
     except Exception as e:
         return jsonify({"error": f"Authentication failed: {str(e)}"}), 500
-@auth_bp.get("/api/auth/verify-email/<token>")
-def verify_email(token):
-    user = User.query.filter_by(verification_token=token).first()
-    if not user:
-        return jsonify({"error": "Invalid or expired verification token"}), 400
-
-    user.is_verified = True
-    user.verification_token = None # Clear token after verification
-    db.session.commit()
-
-    return jsonify({"message": "Email verified successfully! You can now log in."}), 200
-
-@auth_bp.post("/api/auth/apple")
-def apple_login():
-    # Placeholder for Apple Sign-in verification
-    # Requires client_id, team_id, key_id, and .p8 private key
-    return jsonify({"error": "Apple Sign-in is not yet configured. Please provide your Apple Developer credentials."}), 501
-
-@auth_bp.post("/api/auth/instagram")
-def instagram_login():
-    # Placeholder for Instagram Sign-in 
-    # Requires Meta App ID and Client Secret
-    return jsonify({"error": "Instagram Sign-in is not yet configured. Please provide your Meta App Developer credentials."}), 501

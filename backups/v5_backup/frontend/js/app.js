@@ -635,9 +635,12 @@ const App = {
 
     const result = await API.post("/api/auth/signup", { name, email, password });
     
-    if (result && !result.error) {
-      Toast.show("Account created! Please check your email for the verification link. 📧", "warning");
-      this.toggleAuthMode('login');
+    if (result && result.access_token) {
+      sessionStorage.setItem("chatiq_token", result.access_token);
+      sessionStorage.setItem("chatiq_user", JSON.stringify(result.user));
+      document.getElementById("login-overlay").style.display = "none";
+      Toast.show(`Welcome, ${result.user.name}! 👋`, "success");
+      location.reload();
     } else {
       errEl.textContent = result?.error || "Signup failed. Please try again.";
     }
@@ -653,10 +656,6 @@ const App = {
     const result = await API.post("/api/auth/login", { email, password });
     
     if (result && result.access_token) {
-      if (result.user && result.user.is_verified === false) {
-        Toast.show("Please verify your email to log in.", "warning");
-        return;
-      }
       sessionStorage.setItem("chatiq_token", result.access_token);
       sessionStorage.setItem("chatiq_user", JSON.stringify(result.user));
       document.getElementById("login-overlay").style.display = "none";
@@ -666,10 +665,6 @@ const App = {
       errEl.textContent = result?.error || "Invalid email or password.";
       document.getElementById("login-pass").value = "";
     }
-  },
-
-  async socialLogin(provider) {
-    Toast.show(`${provider.charAt(0).toUpperCase() + provider.slice(1)} integration is in Demo Mode.`, "warning");
   },
 
   /* ─── TEST CHATBOT ──────────────────────────────────────────────────── */

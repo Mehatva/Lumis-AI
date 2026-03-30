@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChatIQ — Premium Business Bot Dashboard</title>
+  <meta name="description" content="Manage your AI-powered Instagram chatbot with ChatIQ. Luxury automation for premium brands." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     LOGIN OVERLAY
+     A high-end entry point that sets the tone for the product.
+═══════════════════════════════════════════════════════════════════════ -->
+<div class="login-overlay" id="login-overlay">
+  <div class="login-glass">
+    <div class="login-logo">ChatIQ</div>
+    <form id="login-form" onsubmit="App.login(event)">
+      <input type="password" id="login-pass" class="login-input" placeholder="Secret Key" required autofocus />
+      <button type="submit" class="login-btn">Authenticate</button>
+      <div id="login-error" style="color: #ef4444; margin-top: 16px; font-size: 0.85rem;"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     FLOATING NAVIGATION
+═══════════════════════════════════════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-name">ChatIQ</span>
+    <span class="logo-sub">Automation</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" data-page="dashboard" id="nav-dashboard">
+      <span class="nav-icon">📊</span>
+      <span>Dashboard</span>
+    </a>
+    <a href="#" class="nav-item" data-page="faqs" id="nav-faqs">
+      <span class="nav-icon">💬</span>
+      <span>Knowledge Base</span>
+    </a>
+    <a href="#" class="nav-item" data-page="leads" id="nav-leads">
+      <span class="nav-icon">🎯</span>
+      <span>Lead Capture</span>
+    </a>
+    <a href="#" class="nav-item" data-page="settings" id="nav-settings">
+      <span class="nav-icon">⚙️</span>
+      <span>Settings</span>
+    </a>
+  </nav>
+
+  <div style="margin-top: auto;">
+    <div style="font-size: 0.7rem; color: #10b981; margin-bottom: 4px; font-weight: 700;" id="plan-badge">PRO PLAN</div>
+    <div style="font-size: 0.85rem; color: #636366; overflow: hidden; text-overflow: ellipsis;" id="sidebar-business-name">Business Name</div>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MAIN CANVAS
+═══════════════════════════════════════════════════════════════════════ -->
+<main class="main-content" id="main-content">
+
+  <header class="topbar">
+    <h1 class="page-title" id="page-title">Overview</h1>
+    <div class="topbar-right">
+      <select id="business-select" class="select-input">
+        <option value="">Switch Business</option>
+      </select>
+      <div class="status-dot"></div>
+    </div>
+  </header>
+
+  <!-- ─── PAGE: DASHBOARD (Bento Grid) ─── -->
+  <section class="page active" id="page-dashboard">
+    <div class="dashboard-bento">
+      
+      <!-- Primary Stat -->
+      <div class="bento-card col-2 stat-widget">
+        <div class="stat-label">Response Accuracy</div>
+        <div class="stat-value">98.4<span style="font-size: 1.5rem; color: #636366;">%</span></div>
+        <div class="stat-trend trend-up">↑ Improved this week</div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="bento-card stat-widget">
+        <div class="stat-label">Total Leads</div>
+        <div class="stat-value" id="stat-leads">0</div>
+      </div>
+
+      <div class="bento-card stat-widget">
+        <div class="stat-label" style="color: #ef4444;">Needs Attention</div>
+        <div class="stat-value" id="stat-attention" style="color: #ef4444;">0</div>
+      </div>
+
+      <!-- Automation Health -->
+      <div class="bento-card row-2">
+        <div class="stat-label" style="margin-bottom: 24px;">Bot Configuration</div>
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+            <span style="color: #636366;">Instagram Webhook</span>
+            <span class="emerald">Connected</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+            <span style="color: #636366;">OpenAI Engine</span>
+            <span style="color: #f59e0b;">Mocked</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+            <span style="color: #636366;">Capture Flow</span>
+            <span class="emerald">Active</span>
+          </div>
+        </div>
+        <div style="margin-top: 40px;">
+           <button class="login-btn" style="background: var(--bg-input); color: #fff; padding: 12px;" onclick="App.testWebhook()">Test Interaction</button>
+        </div>
+      </div>
+
+      <!-- Experience Visualizer -->
+      <div class="bento-card col-2 row-2">
+         <div class="stat-label" style="margin-bottom: 12px;">The Conversion Engine</div>
+         <p style="font-size: 0.95rem; color: #636366; margin-bottom: 32px; line-height: 1.6;">
+            ChatIQ handles the complexity of customer intent so you can focus on scale. Our engine bridges the gap between raw data and human-like conversation.
+         </p>
+         <div class="action-grid">
+            <div class="luxury-btn" onclick="App.navigate('faqs')">
+               <span>Knowledge Base</span>
+               <p style="font-size: 0.75rem; color: #636366;">Configure your brand answers.</p>
+            </div>
+            <div class="luxury-btn" onclick="App.navigate('leads')">
+               <span>Lead Extraction</span>
+               <p style="font-size: 0.75rem; color: #636366;">Download captured data.</p>
+            </div>
+         </div>
+      </div>
+
+      <!-- Messages Stat -->
+      <div class="bento-card stat-widget">
+        <div class="stat-label">Total Messages</div>
+        <div class="stat-value" id="stat-messages">0</div>
+      </div>
+
+      <!-- Action Card -->
+      <div class="bento-card">
+        <div class="stat-label">Security</div>
+        <div style="font-size: 0.9rem; color: #636366;">Administrator session is active.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── PAGE: KNOWLEDGE BASE (FAQs) ─── -->
+  <section class="page" id="page-faqs">
+     <div style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 40px;">
+        <button class="login-btn" style="width: auto; padding: 0 24px; background: #6366f1;" onclick="App.openImportModal()">✨ Magic Import</button>
+        <button class="login-btn" style="width: auto; padding: 0 32px;" onclick="App.openFaqModal()">+ Create FAQ</button>
+     </div>
+    <div class="dashboard-bento" id="faqs-grid">
+       <!-- Dynamic content here -->
+    </div>
+  </section>
+
+  <!-- ─── PAGE: LEADS ─── -->
+  <section class="page" id="page-leads">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 40px;">
+       <h2 style="font-family: var(--font-heading);">Extracted Leads</h2>
+       <button class="login-btn" style="width: auto; padding: 0 32px; background: transparent; border: 1px solid var(--border); color: #fff;" onclick="App.exportLeads()">Export CSV</button>
+    </div>
+    <div class="luxury-table-container">
+      <table class="luxury-table">
+        <thead>
+          <tr>
+            <th>Identity</th>
+            <th>Contact</th>
+            <th>Source</th>
+            <th>Timestamp</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="leads-tbody">
+          <!-- Dynamic -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─── PAGE: SETTINGS ─── -->
+  <section class="page" id="page-settings">
+     <div class="dashboard-bento">
+        <div class="bento-card col-2">
+           <form id="settings-form" onsubmit="App.saveSettings(event)" style="display: flex; flex-direction: column; gap: 24px;">
+              <h3 style="font-family: var(--font-heading);">Organization Profile</h3>
+              <input type="text" id="set-name" class="login-input" style="text-align: left;" placeholder="Organization Name" required />
+              <select id="set-niche" class="select-input" style="border-radius: 12px; width: 100%;">
+                 <option value="gym">Gym / Fitness</option>
+                 <option value="salon">Salon / Spa</option>
+                 <option value="cafe">Cafe / Dining</option>
+                 <option value="general">Corporate / Other</option>
+              </select>
+              <textarea id="set-welcome" class="login-input" style="text-align: left; height: 120px;" placeholder="Welcome Signature"></textarea>
+              <button type="submit" class="login-btn">Update Organization</button>
+           </form>
+        </div>
+        <div class="bento-card col-2">
+           <h3 style="font-family: var(--font-heading); margin-bottom: 24px;">System Identity</h3>
+           <div style="display: flex; flex-direction: column; gap: 16px;">
+              <div class="luxury-btn">
+                 <span>Mock Mode</span>
+                 <p style="font-size: 0.8rem; color: #10b981;">Simulated AI active.</p>
+              </div>
+              <div class="luxury-btn">
+                 <span>Encryption</span>
+                 <p style="font-size: 0.8rem; color: #636366;">End-to-end data safety.</p>
+              </div>
+           </div>
+        </div>
+     </div>
+  </section>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════════════════════════════════ -->
+
+<!-- FAQ Modal -->
+<div class="modal-overlay" id="faq-modal" onclick="App.closeFaqModal(event)">
+  <div class="luxury-modal">
+    <h3 style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 24px;">Configure Knowledge</h3>
+    <form id="faq-form" onsubmit="App.saveFaq(event)" style="display: flex; flex-direction: column; gap: 16px;">
+      <input type="hidden" id="faq-id" />
+      <input type="text" id="faq-question" class="login-input" style="text-align: left;" placeholder="Internal Label" required />
+      <input type="text" id="faq-keywords" class="login-input" style="text-align: left;" placeholder="Triggers (comma separated)" required />
+      <textarea id="faq-response" class="login-input" style="text-align: left; height: 100px;" placeholder="System Response" required></textarea>
+      <div style="display: flex; gap: 16px;">
+         <input type="text" id="faq-cta-label" class="login-input" style="text-align: left;" placeholder="CTA Label" />
+         <input type="url" id="faq-cta-url" class="login-input" style="text-align: left;" placeholder="CTA URL" />
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 16px; margin-top: 16px;">
+         <button type="button" class="login-btn" style="background: transparent; color: #fff; width: auto;" onclick="App.closeFaqModal()">Close</button>
+         <button type="submit" class="login-btn" style="width: auto; padding: 0 40px;">Finalize</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Test Bot Modal -->
+<div class="modal-overlay" id="test-modal" onclick="App.closeTestModal(event)">
+  <div class="luxury-modal" style="width: 440px;">
+    <h3 style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 24px;">Chat Test</h3>
+    <div id="chat-preview" style="height: 300px; overflow-y: auto; background: var(--bg-input); border-radius: 12px; padding: 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px;">
+       <!-- Messages -->
+    </div>
+    <form id="test-chat-form" onsubmit="App.sendTestMessage(event)" style="display: flex; gap: 12px;">
+       <input type="text" id="test-message" class="login-input" style="text-align: left; margin-bottom: 0;" placeholder="Say something..." required />
+       <button type="submit" class="login-btn" style="width: auto; padding: 0 24px;">Send</button>
+    </form>
+  </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal-overlay" id="import-modal" onclick="App.closeImportModal(event)">
+  <div class="luxury-modal" style="width: 480px;">
+    <h3 style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 12px;">✨ Magic Import</h3>
+    <p style="font-size: 0.85rem; color: #636366; margin-bottom: 24px; line-height: 1.5;">
+      Enter the business website URL. Our AI will scrape the site, extract key brand facts, and generate a professional Knowledge Base for you instantly.
+    </p>
+    <form id="import-form" onsubmit="App.runMagicImport(event)">
+       <input type="url" id="import-url" class="login-input" style="text-align: left; font-size: 0.95rem; padding: 12px 20px;" placeholder="https://example.com" required />
+       <div id="import-error" style="color: #ef4444; font-size: 0.8rem; margin-top: -16px; margin-bottom: 16px; display: none;"></div>
+       <div id="import-actions" style="display: flex; justify-content: flex-end; gap: 16px;">
+          <button type="button" class="login-btn" style="background: transparent; color: #fff; width: auto;" onclick="App.closeImportModal()">Cancel</button>
+          <button type="submit" id="import-submit-btn" class="login-btn" style="width: auto; padding: 0 40px; background: #6366f1;">Start Extraction</button>
+       </div>
+    </form>
+    <div id="import-loader" style="display: none; flex-direction: column; align-items: center; gap: 20px; padding: 20px 0;">
+       <div class="pulse-loader"></div>
+       <div style="text-align: center;">
+          <p style="font-size: 0.9rem; color: #fff; font-weight: 600; margin-bottom: 4px;">AI is analyzing the brand...</p>
+          <p style="font-size: 0.75rem; color: #636366;">This typically takes 5-10 seconds.</p>
+       </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" style="position: fixed; bottom: 40px; right: 40px; background: #fff; color: #000; padding: 12px 24px; border-radius: 12px; font-weight: 600; transform: translateY(100px); transition: all 0.4s; z-index: 10000;"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
