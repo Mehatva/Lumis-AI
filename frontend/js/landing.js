@@ -105,9 +105,15 @@ const App = {
     },
 
     async initGoogleAuth() {
-        if (!window.google) return;
+        if (this._googleAuthInited) return; 
         
-        let clientId = "GOOGLE_CLIENT_ID_PLACEHOLDER"; // Fallback
+        if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+            console.log("[Google Auth] Waiting for SDK...");
+            setTimeout(() => this.initGoogleAuth(), 500);
+            return;
+        }
+        
+        let clientId = "GOOGLE_CLIENT_ID_PLACEHOLDER"; 
         
         try {
             const r = await fetch(`${API_BASE}/api/auth/config`);
@@ -127,6 +133,7 @@ const App = {
         });
         
         this.renderGoogleButtons();
+        this._googleAuthInited = true;
     },
 
     renderGoogleButtons() {
