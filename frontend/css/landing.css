@@ -414,13 +414,13 @@ footer {
 }
 
 .social-btn {
-    height: 44px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
-    border-radius: 8px;
-    font-size: 0.95rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

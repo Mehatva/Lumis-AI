@@ -144,8 +144,8 @@ const App = {
             theme: "outline",
             size: "large",
             width: "100%",
-            height: 44, // Match our CSS
-            shape: "pill"
+            height: 40, // Match our refined CSS
+            shape: "rectangular"
         };
         
         if (loginContainer) {
