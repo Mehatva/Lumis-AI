@@ -405,3 +405,70 @@ footer {
     .pricing-grid { gap: 60px; max-width: 450px; }
     .price-card.popular { transform: none; }
 }
+/* ─── Social Login Buttons ─── */
+.social-login-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.social-btn {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    width: 100%;
+    font-family: inherit;
+}
+
+.apple-btn {
+    background: #000;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.15);
+}
+
+.apple-btn:hover {
+    background: #111;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.instagram-btn {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    color: #fff;
+}
+
+.instagram-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 39, 67, 0.3);
+}
+
+/* Divider */
+.auth-divider {
+    margin: 24px 0;
+    display: flex;
+    align-items: center;
+    color: rgba(255,255,255,0.3);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.auth-divider::before, .auth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+}
+
+.auth-divider span {
+    padding: 0 12px;
+}

@@ -160,22 +160,20 @@
       <input type="password" id="login-pass" class="login-input" style="text-align: left;" placeholder="Password" required />
       <button type="submit" class="login-btn">Sign In</button>
       
-      <div class="divider" style="margin: 20px 0; display: flex; align-items: center; color: var(--text-muted); font-size: 0.8rem;">
-        <div style="flex: 1; height: 1px; background: var(--border-bright);"></div>
-        <span style="padding: 0 10px;">OR</span>
-        <div style="flex: 1; height: 1px; background: var(--border-bright);"></div>
+      <div class="auth-divider">
+        <span>OR</span>
       </div>
 
-      <div class="social-login-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 20px;">
-        <div id="google-login-btn" style="display: flex; justify-content: center;"></div>
+      <div class="social-login-grid">
+        <div id="google-login-btn"></div>
         
-        <button type="button" class="social-btn apple-btn" onclick="App.socialLogin('apple')" style="display: flex; align-items: center; justify-content: center; gap: 10px; background: #000; color: #fff; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); font-weight: 500; font-size: 0.9rem; cursor: pointer;">
-          <i data-lucide="apple" style="width: 18px; height: 18px;"></i>
+        <button type="button" class="social-btn apple-btn" onclick="App.socialLogin('apple')">
+          <i data-lucide="apple"></i>
           Sign in with Apple
         </button>
         
-        <button type="button" class="social-btn instagram-btn" onclick="App.socialLogin('instagram')" style="display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: #fff; padding: 10px; border-radius: 6px; border: none; font-weight: 500; font-size: 0.9rem; cursor: pointer;">
-          <i data-lucide="instagram" style="width: 18px; height: 18px;"></i>
+        <button type="button" class="social-btn instagram-btn" onclick="App.socialLogin('instagram')">
+          <i data-lucide="instagram"></i>
           Sign in with Instagram
         </button>
       </div>
@@ -193,22 +191,20 @@
       <input type="password" id="signup-pass" class="login-input" style="text-align: left;" placeholder="Create Password" required />
       <button type="submit" class="login-btn">Get Started</button>
       
-      <div class="divider" style="margin: 20px 0; display: flex; align-items: center; color: var(--text-muted); font-size: 0.8rem;">
-        <div style="flex: 1; height: 1px; background: var(--border-bright);"></div>
-        <span style="padding: 0 10px;">OR</span>
-        <div style="flex: 1; height: 1px; background: var(--border-bright);"></div>
+      <div class="auth-divider">
+        <span>OR</span>
       </div>
 
-      <div class="social-login-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 20px;">
-        <div id="google-signup-btn" style="display: flex; justify-content: center;"></div>
+      <div class="social-login-grid">
+        <div id="google-signup-btn"></div>
         
-        <button type="button" class="social-btn apple-btn" onclick="App.socialLogin('apple')" style="display: flex; align-items: center; justify-content: center; gap: 10px; background: #000; color: #fff; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); font-weight: 500; font-size: 0.9rem; cursor: pointer;">
-          <i data-lucide="apple" style="width: 18px; height: 18px;"></i>
+        <button type="button" class="social-btn apple-btn" onclick="App.socialLogin('apple')">
+          <i data-lucide="apple"></i>
           Sign up with Apple
         </button>
         
-        <button type="button" class="social-btn instagram-btn" onclick="App.socialLogin('instagram')" style="display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: #fff; padding: 10px; border-radius: 6px; border: none; font-weight: 500; font-size: 0.9rem; cursor: pointer;">
-          <i data-lucide="instagram" style="width: 18px; height: 18px;"></i>
+        <button type="button" class="social-btn instagram-btn" onclick="App.socialLogin('instagram')">
+          <i data-lucide="instagram"></i>
           Sign up with Instagram
         </button>
       </div>

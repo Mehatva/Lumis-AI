@@ -140,18 +140,20 @@ const App = {
         const loginContainer = document.getElementById("google-login-btn");
         const signupContainer = document.getElementById("google-signup-btn");
         
+        const options = {
+            theme: "outline",
+            size: "large",
+            width: "100%",
+            height: 44, // Match our CSS
+            shape: "pill"
+        };
+        
         if (loginContainer) {
-            google.accounts.id.renderButton(
-                loginContainer,
-                { theme: "outline", size: "large", width: "100%", text: "signin_with" }
-            );
+            google.accounts.id.renderButton(loginContainer, { ...options, text: "signin_with" });
         }
         
         if (signupContainer) {
-            google.accounts.id.renderButton(
-                signupContainer,
-                { theme: "outline", size: "large", width: "100%", text: "signup_with" }
-            );
+            google.accounts.id.renderButton(signupContainer, { ...options, text: "signup_with" });
         }
     },
 
