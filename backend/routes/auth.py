@@ -5,8 +5,53 @@ from google.auth.transport import requests
 from models import db
 from models.user import User
 import uuid
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import os
+import threading
 
 auth_bp = Blueprint("auth", __name__)
+
+def send_verification_email_async(to_email, verification_link):
+    smtp_server = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
+    smtp_port = int(os.environ.get("SMTP_PORT", 587))
+    smtp_username = os.environ.get("SMTP_USERNAME")
+    smtp_password = os.environ.get("SMTP_PASSWORD")
+
+    if not smtp_username or not smtp_password:
+        print(f"\n[MOCK EMAIL - NO SMTP CONFIGURED] Verification Link: {verification_link}\n")
+        return
+
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = "Welcome to Lumis AI — Action Required"
+        msg["From"] = f"Lumis AI <{smtp_username}>"
+        msg["To"] = to_email
+
+        html_content = f"""
+        <html>
+          <body style="font-family: Arial, sans-serif; background-color: #020406; color: #ffffff; padding: 40px 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: #06060a; padding: 40px; border-radius: 12px; border: 1px solid #14b8a6; text-align: center;">
+              <h2 style="color: #ffffff; margin-bottom: 10px;">Welcome to <span style="color: #14b8a6;">Lumis AI</span></h2>
+              <p style="color: #a0aec0; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
+                You're almost there! We just need to verify your email address to secure your account and grant you full access to the platform.
+              </p>
+              <a href="{verification_link}" style="display: inline-block; padding: 14px 28px; background-color: #14b8a6; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">Verify My Email</a>
+              <p style="color: #4a5568; font-size: 12px; margin-top: 40px;">If you didn't create an account, you can safely ignore this email.</p>
+            </div>
+          </body>
+        </html>
+        """
+        msg.attach(MIMEText(html_content, "html"))
+
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(smtp_username, smtp_password)
+            server.send_message(msg)
+            print(f"[SMTP] Successfully sent verification email to {to_email}")
+    except Exception as e:
+        print(f"[SMTP ERROR] Failed to send email to {to_email}: {e}")
 
 @auth_bp.get("/api/auth/config")
 def get_auth_config():
@@ -36,8 +81,9 @@ def signup():
     db.session.add(user)
     db.session.commit()
 
-    # MOCK EMAIL: Log verification link to terminal
-    print(f"\n[MOCK EMAIL] Verification Link: http://localhost:5001/api/auth/verify-email/{user.verification_token}\n")
+    # Dispatch email asynchronously so it doesn't block the UI
+    verification_link = f"http://localhost:5001/api/auth/verify-email/{user.verification_token}"
+    threading.Thread(target=send_verification_email_async, args=(email, verification_link)).start()
 
     access_token = create_access_token(identity=str(user.id))
     return jsonify({
