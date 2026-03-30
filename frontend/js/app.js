@@ -617,8 +617,6 @@ const App = {
   },
 
   // ─── AUTH & LOGIN ──────────────────────────────────────────────────
-──
-
   checkAuth() {
     const token = sessionStorage.getItem("chatiq_token");
     if (token) {
