@@ -117,12 +117,7 @@ const App = {
 
         google.accounts.id.renderButton(
             document.getElementById("google-login-btn"),
-            { theme: "outline", size: "large", width: "100%", text: "signin_with" }
-        );
-        
-        google.accounts.id.renderButton(
-            document.getElementById("google-signup-btn"),
-            { theme: "outline", size: "large", width: "100%", text: "signup_with" }
+            { theme: "outline", size: "large", width: "100%" }
         );
     },
 

@@ -97,7 +97,7 @@ def google_login():
 
         if not user:
             # Create new user
-            user = User(email=email, name=name, is_verified=True)
+            user = User(email=email, name=name)
             # For Google users, we might not have a password, so we set a random or empty one
             # and rely on Google for future logins.
             user.set_password(f"google_{google_id}") 
