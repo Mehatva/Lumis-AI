@@ -107,26 +107,26 @@ const App = {
     async initGoogleAuth() {
         if (!window.google) return;
         
-        // Fetch the real Client ID from the backend
+        let clientId = "GOOGLE_CLIENT_ID_PLACEHOLDER"; // Fallback
+        
         try {
             const r = await fetch(`${API_BASE}/api/auth/config`);
-            const config = await r.json();
-            const clientId = config.google_client_id;
-            
-            if (!clientId || clientId.includes("PLACEHOLDER")) {
-                console.warn("[Google Auth] Client ID not configured in .env");
-                return;
+            if (r.ok) {
+                const config = await r.json();
+                if (config.google_client_id && !config.google_client_id.includes("PLACEHOLDER")) {
+                    clientId = config.google_client_id;
+                }
             }
-
-            google.accounts.id.initialize({
-                client_id: clientId,
-                callback: this.handleGoogleSignIn.bind(this)
-            });
-            
-            this.renderGoogleButtons();
         } catch (e) {
-            console.error("[Google Auth] Failed to fetch config:", e);
+            console.warn("[Google Auth] Could not fetch config, using fallback.");
         }
+
+        google.accounts.id.initialize({
+            client_id: clientId,
+            callback: this.handleGoogleSignIn.bind(this)
+        });
+        
+        this.renderGoogleButtons();
     },
 
     renderGoogleButtons() {
