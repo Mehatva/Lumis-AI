@@ -35,18 +35,20 @@ def handle_instagram():
     except (KeyError, IndexError):
         pass
 
-    # Load business record
+    # Load authentic business record
     business = None
     if page_id:
         business = Business.query.filter_by(instagram_page_id=page_id, is_active=True).first()
 
-    # Fallback: use first active business (useful during demo/mock mode)
+    # SECURITY LOCKDOWN: We no longer fallback to a random business. 
+    # The webhook MUST match a registered Instagram Page ID.
     if not business:
-        business = Business.query.filter_by(is_active=True).first()
+        current_app.logger.warning(f"Unauthorized Webhook Context: No active business found for page_id {page_id}")
+        return jsonify({"status": "ignored_no_business_match"}), 200
 
-    if not business:
-        current_app.logger.warning("No active business found for incoming webhook.")
-        return jsonify({"status": "no_business"}), 200  # Always return 200 to Meta
+    if not business.access_token:
+        current_app.logger.warning(f"Business {business.name} has no Meta Access Token configured.")
+        return jsonify({"status": "ignored_no_token"}), 200
 
     # Parse messages
     insta = InstagramService(access_token=business.access_token)
@@ -58,9 +60,13 @@ def handle_instagram():
         sender_id = msg["sender_id"]
         text = msg["text"]
 
-        current_app.logger.info(f"[Webhook] From {sender_id}: {text}")
+        current_app.logger.info(f"[Live Webhook] From {sender_id} to Page {page_id}: {text}")
 
+        # Generate response using AI engine
         reply = chatbot.process(sender_id, text)
+        
+        # Dispatch to real Meta API
         insta.send_message(sender_id, reply)
 
     return jsonify({"status": "ok"}), 200
+

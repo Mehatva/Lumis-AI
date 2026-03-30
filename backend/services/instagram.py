@@ -57,6 +57,10 @@ class InstagramService:
             print(f"\n[MOCK] → Instagram reply to {recipient_id}:\n{text}\n")
             return {"mock": True, "recipient_id": recipient_id, "text": text}
 
+        if not self.access_token:
+            print("[InstagramService] ERROR: No access token provided.")
+            return {"error": "missing_token"}
+
         url = f"{GRAPH_API_BASE}/me/messages"
         payload = {
             "recipient": {"id": recipient_id},
@@ -69,6 +73,15 @@ class InstagramService:
             r = requests.post(url, json=payload, params=params, timeout=10)
             r.raise_for_status()
             return r.json()
+        except requests.HTTPError as e:
+            # Safely attempt to parse Meta's specific JSON error response
+            meta_error = "Unknown HTTP Error"
+            try:
+                meta_error = r.json()
+            except Exception:
+                pass
+            print(f"[InstagramService] Meta API Error: {meta_error}")
+            return {"error": "meta_api_error", "details": meta_error}
         except requests.RequestException as e:
-            print(f"[InstagramService] send error: {e}")
-            return {"error": str(e)}
+            print(f"[InstagramService] Network Error: {e}")
+            return {"error": "network_error", "details": str(e)}
