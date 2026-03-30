@@ -104,26 +104,48 @@ const App = {
         }
     },
 
-    initGoogleAuth() {
+    async initGoogleAuth() {
         if (!window.google) return;
         
-        // We'll need a real client ID from the user. For now, use a placeholder.
-        const clientId = "GOOGLE_CLIENT_ID_PLACEHOLDER"; 
-        
-        google.accounts.id.initialize({
-            client_id: clientId,
-            callback: this.handleGoogleSignIn.bind(this)
-        });
+        // Fetch the real Client ID from the backend
+        try {
+            const r = await fetch(`${API_BASE}/api/auth/config`);
+            const config = await r.json();
+            const clientId = config.google_client_id;
+            
+            if (!clientId || clientId.includes("PLACEHOLDER")) {
+                console.warn("[Google Auth] Client ID not configured in .env");
+                return;
+            }
 
-        google.accounts.id.renderButton(
-            document.getElementById("google-login-btn"),
-            { theme: "outline", size: "large", width: "100%", text: "signin_with" }
-        );
+            google.accounts.id.initialize({
+                client_id: clientId,
+                callback: this.handleGoogleSignIn.bind(this)
+            });
+            
+            this.renderGoogleButtons();
+        } catch (e) {
+            console.error("[Google Auth] Failed to fetch config:", e);
+        }
+    },
+
+    renderGoogleButtons() {
+        const loginContainer = document.getElementById("google-login-btn");
+        const signupContainer = document.getElementById("google-signup-btn");
         
-        google.accounts.id.renderButton(
-            document.getElementById("google-signup-btn"),
-            { theme: "outline", size: "large", width: "100%", text: "signup_with" }
-        );
+        if (loginContainer) {
+            google.accounts.id.renderButton(
+                loginContainer,
+                { theme: "outline", size: "large", width: "100%", text: "signin_with" }
+            );
+        }
+        
+        if (signupContainer) {
+            google.accounts.id.renderButton(
+                signupContainer,
+                { theme: "outline", size: "large", width: "100%", text: "signup_with" }
+            );
+        }
     },
 
     async handleGoogleSignIn(response) {

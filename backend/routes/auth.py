@@ -8,6 +8,12 @@ import uuid
 
 auth_bp = Blueprint("auth", __name__)
 
+@auth_bp.get("/api/auth/config")
+def get_auth_config():
+    return jsonify({
+        "google_client_id": current_app.config.get("GOOGLE_CLIENT_ID")
+    }), 200
+
 @auth_bp.post("/api/auth/signup")
 def signup():
     data = request.get_json() or {}
