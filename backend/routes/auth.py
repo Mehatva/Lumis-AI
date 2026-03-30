@@ -1,5 +1,7 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from google.oauth2 import id_token
+from google.auth.transport import requests
 from models import db
 from models.user import User
 
@@ -58,3 +60,54 @@ def me():
     if not user:
         return jsonify({"error": "User not found"}), 404
     return jsonify(user.to_dict()), 200
+
+@auth_bp.post("/api/auth/google")
+def google_login():
+    data = request.get_json() or {}
+    token = data.get("credential") # The ID token from Google
+
+    if not token:
+        return jsonify({"error": "Google token is required"}), 400
+
+    try:
+        # Verify the ID token
+        id_info = id_token.verify_oauth2_token(
+            token, 
+            requests.Request(), 
+            current_app.config["GOOGLE_CLIENT_ID"]
+        )
+
+        # ID token is valid. Get the user's profile information from the decoded token.
+        email = id_info.get("email")
+        name = id_info.get("name")
+        google_id = id_info.get("sub")
+
+        if not email:
+            return jsonify({"error": "Email not found in Google token"}), 400
+
+        # Check if user exists
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            # Create new user
+            user = User(email=email, name=name)
+            # For Google users, we might not have a password, so we set a random or empty one
+            # and rely on Google for future logins.
+            user.set_password(f"google_{google_id}") 
+            db.session.add(user)
+            db.session.commit()
+
+        # Create access token
+        access_token = create_access_token(identity=str(user.id))
+        
+        return jsonify({
+            "message": "Google login successful",
+            "access_token": access_token,
+            "user": user.to_dict()
+        }), 200
+
+    except ValueError as e:
+        # Invalid token
+        return jsonify({"error": f"Invalid Google token: {str(e)}"}), 401
+    except Exception as e:
+        return jsonify({"error": f"Authentication failed: {str(e)}"}), 500

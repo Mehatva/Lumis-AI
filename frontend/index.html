@@ -8,14 +8,18 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/landing.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="luxury-dark landing-page">
 
-<!-- Background Blobs from Core Theme -->
+<!-- Background Blobs & Texture -->
 <div class="bg-blobs">
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
     <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+    <div class="blob blob-5"></div>
+    <div class="grain-overlay"></div>
 </div>
 
 <!-- Navigation -->
@@ -67,13 +71,13 @@
         </div>
         
         <div class="feature-card reveal" style="transition-delay: 0.1s;">
-            <div class="feature-icon" style="color: var(--accent-emerald); background: rgba(16, 185, 129, 0.1);"><i data-lucide="users"></i></div>
+            <div class="feature-icon"><i data-lucide="users"></i></div>
             <h3 class="feature-name">Lead Extraction</h3>
             <p class="feature-desc">Automatically identify and capture names, phone numbers, and intent from every conversation into a clean dashboard.</p>
         </div>
         
         <div class="feature-card reveal" style="transition-delay: 0.2s;">
-            <div class="feature-icon" style="color: var(--accent-rose); background: rgba(244, 63, 94, 0.1);"><i data-lucide="zap"></i></div>
+            <div class="feature-icon"><i data-lucide="zap"></i></div>
             <h3 class="feature-name">Human Handoff</h3>
             <p class="feature-desc">AI handles the routine, but instantly flags complex inquiries for you to take over when it matters most.</p>
         </div>
@@ -84,7 +88,7 @@
 <section id="pricing" class="pricing">
     <div class="container">
         <div class="section-header reveal">
-            <span class="section-tag" style="color: var(--accent-rose);">Investment</span>
+            <span class="section-tag">Investment</span>
             <h2 class="section-title">Tailored Plans</h2>
         </div>
 
@@ -104,7 +108,7 @@
             <!-- Growth (Popular) -->
             <div class="price-card popular reveal" style="transition-delay: 0.1s;">
                 <div class="popular-tag">MOST POPULAR</div>
-                <div class="plan-name" style="color: var(--accent);">Growth</div>
+                <div class="plan-name">Growth</div>
                 <div class="plan-price">₹1,999<sub>/mo</sub></div>
                 <ul class="plan-features">
                     <li><i data-lucide="check"></i> Everything in Starter</li>
@@ -155,6 +159,14 @@
       <input type="email" id="login-email" class="login-input" style="text-align: left;" placeholder="Email address" required />
       <input type="password" id="login-pass" class="login-input" style="text-align: left;" placeholder="Password" required />
       <button type="submit" class="login-btn">Sign In</button>
+      
+      <div class="divider" style="margin: 20px 0; display: flex; align-items: center; color: var(--text-muted); font-size: 0.8rem;">
+        <div style="flex: 1; height: 1px; background: var(--border-bright);"></div>
+        <span style="padding: 0 10px;">OR</span>
+        <div style="flex: 1; height: 1px; background: var(--border-bright);"></div>
+      </div>
+
+      <div id="google-login-btn" style="display: flex; justify-content: center; margin-bottom: 10px;"></div>
       <div style="margin-top: 16px; font-size: 0.85rem; color: var(--muted);">
         New here? <a href="#" onclick="App.toggleAuthMode('signup')" style="color: var(--accent); text-decoration: none;">Create an account</a>
       </div>

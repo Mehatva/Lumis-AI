@@ -99,6 +99,49 @@ const App = {
         } catch (e) {
             errEl.textContent = "Server unreachable.";
         }
+    },
+
+    initGoogleAuth() {
+        if (!window.google) return;
+        
+        // We'll need a real client ID from the user. For now, use a placeholder.
+        const clientId = "GOOGLE_CLIENT_ID_PLACEHOLDER"; 
+        
+        google.accounts.id.initialize({
+            client_id: clientId,
+            callback: this.handleGoogleSignIn.bind(this)
+        });
+
+        google.accounts.id.renderButton(
+            document.getElementById("google-login-btn"),
+            { theme: "outline", size: "large", width: "100%" }
+        );
+    },
+
+    async handleGoogleSignIn(response) {
+        console.log("Encoded JWT ID token: " + response.credential);
+        const errEl = document.getElementById("login-error");
+        errEl.textContent = "";
+
+        try {
+            const r = await fetch(`${API_BASE}/api/auth/google`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ credential: response.credential })
+            });
+            const result = await r.json();
+
+            if (r.ok && result.access_token) {
+                sessionStorage.setItem("chatiq_token", result.access_token);
+                sessionStorage.setItem("chatiq_user", JSON.stringify(result.user));
+                Toast.show(`Welcome, ${result.user.name}! 👋`);
+                setTimeout(() => window.location.href = "/dashboard", 1000);
+            } else {
+                errEl.textContent = result.error || "Google login failed.";
+            }
+        } catch (e) {
+            errEl.textContent = "Server unreachable.";
+        }
     }
 };
 
@@ -137,4 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Option to redirect to dashboard immediately
         // window.location.href = "/dashboard";
     }
+
+    // Initialize Google Auth on load
+    App.initGoogleAuth();
 });

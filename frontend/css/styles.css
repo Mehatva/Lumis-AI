@@ -18,7 +18,7 @@
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Inter', sans-serif;
 
-  /* THEME: MIDNIGHT OBSIDIAN (Premium Pro) */
+  /* THEME: LUMIS TEAL (Premium Pro) */
   --bg-base: #020205; /* Deep Obsidian */
   --bg-surface: #06060a;
   --bg-card: rgba(10, 10, 15, 0.45);
@@ -28,9 +28,9 @@
   --text-secondary: rgba(255, 255, 255, 0.7);
   --text-muted: rgba(255, 255, 255, 0.45);
   
-  --accent: #4f46e5; /* Hyper-Indigo */
-  --accent-glow: rgba(79, 70, 229, 0.35);
-  --accent-secondary: #818cf8;
+  --accent: #14b8a6; /* Lumis Teal */
+  --accent-glow: rgba(20, 184, 166, 0.35);
+  --accent-secondary: #2dd4bf;
   --accent-emerald: #10b981;
   --emerald-glow: rgba(16, 185, 129, 0.25);
   --accent-rose: #f43f5e;
