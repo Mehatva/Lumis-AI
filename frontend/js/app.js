@@ -559,15 +559,18 @@ const App = {
     if (!b) return;
     document.getElementById("set-name").value = b.name || "";
     document.getElementById("set-niche").value = b.niche || "general";
-    document.getElementById("set-phone").value = b.phone || "";
-    document.getElementById("set-location").value = b.location || "";
-    document.getElementById("set-location-url").value = b.location_url || "";
-    document.getElementById("set-booking-url").value = b.booking_url || "";
-    document.getElementById("set-instagram-id").value = b.instagram_page_id || "";
-    document.getElementById("set-welcome").value = b.welcome_message || "";
-    document.getElementById("set-tone").value = b.tone || "friendly";
-    document.getElementById("plan-badge").textContent =
-      (b.plan || "trial").charAt(0).toUpperCase() + (b.plan || "trial").slice(1) + " Plan";
+    
+    const welcomeEl = document.getElementById("set-welcome");
+    if(welcomeEl) welcomeEl.value = b.welcome_message || "";
+    
+    const igPageIdEl = document.getElementById("set-ig-page-id");
+    if(igPageIdEl) igPageIdEl.value = b.instagram_page_id || "";
+    
+    const igTokenEl = document.getElementById("set-ig-token");
+    if(igTokenEl) igTokenEl.value = b.access_token || "";
+
+    const pb = document.getElementById("plan-badge");
+    if(pb) pb.textContent = (b.plan || "trial").charAt(0).toUpperCase() + (b.plan || "trial").slice(1) + " Plan";
   },
 
   async saveSettings(e) {
@@ -578,13 +581,7 @@ const App = {
     const body = {
       name: document.getElementById("set-name").value.trim(),
       niche: document.getElementById("set-niche").value,
-      phone: document.getElementById("set-phone").value.trim(),
-      location: document.getElementById("set-location").value.trim(),
-      location_url: document.getElementById("set-location-url").value.trim(),
-      booking_url: document.getElementById("set-booking-url").value.trim(),
-      instagram_page_id: document.getElementById("set-instagram-id").value.trim(),
-      welcome_message: document.getElementById("set-welcome").value.trim(),
-      tone: document.getElementById("set-tone").value,
+      welcome_message: document.getElementById("set-welcome").value.trim()
     };
 
     const result = await API.patch(`/api/businesses/${bid}`, body);
@@ -593,14 +590,34 @@ const App = {
       updateSidebarMeta();
       Toast.show("Settings saved ✅", "success");
     } else {
-      // Demo: update local
       Object.assign(State.currentBusiness, body);
       updateSidebarMeta();
       Toast.show("Settings saved locally (demo mode) ✅", "info");
     }
   },
 
-  // ─── AUTH & LOGIN ────────────────────────────────────────────────────
+  async saveIntegrations(e) {
+    e.preventDefault();
+    const bid = State.currentBusiness?.id;
+    if (!bid) return;
+
+    const body = {
+      instagram_page_id: document.getElementById("set-ig-page-id").value.trim(),
+      access_token: document.getElementById("set-ig-token").value.trim()
+    };
+
+    const result = await API.patch(`/api/businesses/${bid}`, body);
+    if (result) {
+      Object.assign(State.currentBusiness, body);
+      Toast.show("Meta Integrations saved successfully! 🚀", "success");
+    } else {
+      Object.assign(State.currentBusiness, body);
+      Toast.show("Integrations saved locally (demo mode)", "info");
+    }
+  },
+
+  // ─── AUTH & LOGIN ──────────────────────────────────────────────────
+──
 
   checkAuth() {
     const token = sessionStorage.getItem("chatiq_token");

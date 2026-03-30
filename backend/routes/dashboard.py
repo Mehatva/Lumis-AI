@@ -61,7 +61,7 @@ def update_business(business_id):
     business = Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
     data = request.get_json() or {}
     allowed = ["name", "niche", "phone", "location", "location_url",
-               "booking_url", "instagram_page_id", "welcome_message", "tone"]
+               "booking_url", "instagram_page_id", "access_token", "welcome_message", "tone"]
     for field in allowed:
         if field in data:
             setattr(business, field, data[field])
