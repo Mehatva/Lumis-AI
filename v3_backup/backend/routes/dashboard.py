@@ -2,7 +2,6 @@
 import json
 import secrets
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db
 from models.business import Business
 from models.faq import FAQ
@@ -15,20 +14,15 @@ dashboard_bp = Blueprint("dashboard", __name__)
 # ─── Business ─────────────────────────────────────────────────────────────
 
 @dashboard_bp.get("/api/businesses")
-@jwt_required()
 def list_businesses():
-    user_id = get_jwt_identity()
-    businesses = Business.query.filter_by(user_id=user_id).all()
+    businesses = Business.query.all()
     return jsonify([b.to_dict() for b in businesses])
 
 
 @dashboard_bp.post("/api/businesses")
-@jwt_required()
 def create_business():
-    user_id = get_jwt_identity()
     data = request.get_json() or {}
     business = Business(
-        user_id=user_id,
         name=data.get("name", "New Business"),
         niche=data.get("niche", "general"),
         phone=data.get("phone"),
@@ -47,18 +41,14 @@ def create_business():
 
 
 @dashboard_bp.get("/api/businesses/<int:business_id>")
-@jwt_required()
 def get_business(business_id):
-    user_id = get_jwt_identity()
-    business = Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
+    business = Business.query.get_or_404(business_id)
     return jsonify(business.to_dict())
 
 
 @dashboard_bp.patch("/api/businesses/<int:business_id>")
-@jwt_required()
 def update_business(business_id):
-    user_id = get_jwt_identity()
-    business = Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
+    business = Business.query.get_or_404(business_id)
     data = request.get_json() or {}
     allowed = ["name", "niche", "phone", "location", "location_url",
                "booking_url", "instagram_page_id", "welcome_message", "tone"]
@@ -72,19 +62,14 @@ def update_business(business_id):
 # ─── FAQs ─────────────────────────────────────────────────────────────────
 
 @dashboard_bp.get("/api/businesses/<int:business_id>/faqs")
-@jwt_required()
 def list_faqs(business_id):
-    user_id = get_jwt_identity()
-    business = Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
     faqs = FAQ.query.filter_by(business_id=business_id).order_by(FAQ.priority.desc()).all()
     return jsonify([f.to_dict() for f in faqs])
 
 
 @dashboard_bp.post("/api/businesses/<int:business_id>/faqs")
-@jwt_required()
 def create_faq(business_id):
-    user_id = get_jwt_identity()
-    Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
+    Business.query.get_or_404(business_id)
     data = request.get_json() or {}
     faq = FAQ(
         business_id=business_id,
@@ -101,12 +86,8 @@ def create_faq(business_id):
 
 
 @dashboard_bp.patch("/api/faqs/<int:faq_id>")
-@jwt_required()
 def update_faq(faq_id):
-    user_id = get_jwt_identity()
     faq = FAQ.query.get_or_404(faq_id)
-    # Check if the business belongs to the user
-    Business.query.filter_by(id=faq.business_id, user_id=user_id).first_or_404()
     data = request.get_json() or {}
     if "question" in data:
         faq.question = data["question"]
@@ -125,12 +106,8 @@ def update_faq(faq_id):
 
 
 @dashboard_bp.delete("/api/faqs/<int:faq_id>")
-@jwt_required()
 def delete_faq(faq_id):
-    user_id = get_jwt_identity()
     faq = FAQ.query.get_or_404(faq_id)
-    # Check if the business belongs to the user
-    Business.query.filter_by(id=faq.business_id, user_id=user_id).first_or_404()
     db.session.delete(faq)
     db.session.commit()
     return jsonify({"deleted": faq_id})
@@ -139,10 +116,8 @@ def delete_faq(faq_id):
 # ─── Analytics ────────────────────────────────────────────────────────────
 
 @dashboard_bp.get("/api/businesses/<int:business_id>/analytics")
-@jwt_required()
 def get_analytics(business_id):
-    user_id = get_jwt_identity()
-    Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
+    Business.query.get_or_404(business_id)
     total_conversations = Conversation.query.filter_by(business_id=business_id).count()
     total_leads = Lead.query.filter_by(business_id=business_id).count()
     converted_leads = Lead.query.filter_by(business_id=business_id, is_converted=True).count()
@@ -201,10 +176,8 @@ def chat_demo():
 
 
 @dashboard_bp.post("/api/businesses/<int:business_id>/auto-kb")
-@jwt_required()
 def auto_kb(business_id):
-    user_id = get_jwt_identity()
-    business = Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
+    business = Business.query.get_or_404(business_id)
     data = request.get_json() or {}
     url = data.get("url")
     print(f"DEBUG: Received Magic Import URL: {url}")

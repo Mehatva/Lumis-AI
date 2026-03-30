@@ -19,7 +19,7 @@ class Business(db.Model):
     plan = db.Column(db.String(20), default="trial")          # trial / starter / growth / pro
     trial_expires_at = db.Column(db.DateTime)
     is_active = db.Column(db.Boolean, default=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True) # Temporarily nullable for existing data
+    api_key = db.Column(db.String(64), unique=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     faqs = db.relationship("FAQ", backref="business", lazy=True, cascade="all, delete-orphan")
@@ -38,7 +38,6 @@ class Business(db.Model):
             "welcome_message": self.welcome_message,
             "tone": self.tone,
             "plan": self.plan,
-            "user_id": self.user_id,
             "is_active": self.is_active,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

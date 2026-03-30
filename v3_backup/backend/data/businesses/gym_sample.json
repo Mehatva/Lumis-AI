@@ -1,0 +1,52 @@
+{
+  "name": "FlexZone Gym",
+  "niche": "gym",
+  "phone": "+91 98765 43210",
+  "location": "123 Fitness Street, Andheri West, Mumbai",
+  "location_url": "https://maps.google.com/?q=FlexZone+Gym+Mumbai",
+  "booking_url": "https://calendly.com/flexzone",
+  "welcome_message": "Hey! 💪 Welcome to FlexZone Gym. How can I help you today?\n\nYou can ask me about:\n• Membership pricing\n• Timings\n• Classes & trainers\n• Location\n• Free trial",
+  "tone": "energetic",
+  "faqs": [
+    {
+      "question": "Membership Pricing",
+      "keywords": ["price", "pricing", "cost", "fee", "charges", "membership", "rate", "how much", "kitna"],
+      "response": "💰 *FlexZone Membership Plans:*\n\n🥉 Basic — ₹999/month\n   ✅ Gym access (6am–10pm)\n   ✅ Locker room\n\n🥈 Standard — ₹1,499/month\n   ✅ Everything in Basic\n   ✅ 2 Group classes/week\n   ✅ Diet consultation\n\n🥇 Premium — ₹2,499/month\n   ✅ Everything in Standard\n   ✅ Personal trainer (3x/week)\n   ✅ Unlimited classes\n\nWant to book a *free trial session*? 🎯",
+      "cta_label": "Book Free Trial",
+      "cta_url": "https://calendly.com/flexzone",
+      "priority": 10
+    },
+    {
+      "question": "Timings",
+      "keywords": ["timing", "timings", "time", "open", "hours", "schedule", "kab", "close", "when"],
+      "response": "⏰ *FlexZone Timings:*\n\n📅 Monday–Saturday: 6:00 AM – 10:00 PM\n📅 Sunday: 8:00 AM – 6:00 PM\n\n🎄 We're open on most holidays! DM us to confirm.",
+      "cta_label": null,
+      "cta_url": null,
+      "priority": 9
+    },
+    {
+      "question": "Location",
+      "keywords": ["location", "address", "where", "kahan", "directions", "map", "find", "located"],
+      "response": "📍 We're located at:\n*123 Fitness Street, Andheri West, Mumbai*\n\nEasily accessible from the Andheri Metro station (5 min walk). 🚇",
+      "cta_label": "Get Directions",
+      "cta_url": "https://maps.google.com/?q=FlexZone+Gym+Mumbai",
+      "priority": 8
+    },
+    {
+      "question": "Free Trial",
+      "keywords": ["trial", "free", "try", "demo", "visit", "first time", "new"],
+      "response": "🎉 Great news! We offer a *FREE 1-day trial* for all new members.\n\nNo commitment, no payment — just show up and experience FlexZone! 💪\n\nBook your spot using the link below 👇",
+      "cta_label": "Book Free Trial",
+      "cta_url": "https://calendly.com/flexzone",
+      "priority": 7
+    },
+    {
+      "question": "Classes & Trainers",
+      "keywords": ["class", "classes", "trainer", "coach", "yoga", "zumba", "cardio", "crossfit", "group"],
+      "response": "🏋️ *FlexZone Classes:*\n\n• Yoga — Mon, Wed, Fri (7am & 7pm)\n• Zumba — Tue, Thu (6pm)\n• CrossFit — Mon–Sat (8am)\n• HIIT Cardio — Daily (6am & 7pm)\n\nAll classes included in Standard & Premium plans! 🌟",
+      "cta_label": null,
+      "cta_url": null,
+      "priority": 6
+    }
+  ]
+}

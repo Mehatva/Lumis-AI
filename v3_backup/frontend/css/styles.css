@@ -6,41 +6,38 @@
 
 :root {
   /* Layout Constants */
-  --sidebar-w: 260px;
-  --header-h: 90px;
-  --glass-blur: 32px;
-  --radius-2xl: 40px;
-  --radius-xl: 28px;
-  --radius-lg: 18px;
-  --radius-md: 10px;
+  --sidebar-w: 280px;
+  --right-panel-w: 340px;
+  --header-h: 80px;
+  --glass-blur: 24px;
+  --radius-xl: 32px;
+  --radius-lg: 20px;
+  --radius-md: 12px;
   
   /* Typography */
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Inter', sans-serif;
 
-  /* THEME: MIDNIGHT OBSIDIAN (Premium Pro) */
-  --bg-base: #020205; /* Deep Obsidian */
-  --bg-surface: #06060a;
-  --bg-card: rgba(10, 10, 15, 0.45);
-  --bg-input: rgba(0, 0, 0, 0.6);
+  /* THEME: LUXURY DARK (Default) */
+  --bg-base: #050508;
+  --bg-surface: #0e0e12;
+  --bg-card: rgba(18, 18, 24, 0.65);
+  --bg-input: rgba(0, 0, 0, 0.4);
   
   --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-secondary: rgba(255, 255, 255, 0.6);
   --text-muted: rgba(255, 255, 255, 0.45);
   
-  --accent: #4f46e5; /* Hyper-Indigo */
-  --accent-glow: rgba(79, 70, 229, 0.35);
+  --accent: #6366f1; /* Indigo */
   --accent-secondary: #818cf8;
   --accent-emerald: #10b981;
-  --emerald-glow: rgba(16, 185, 129, 0.25);
   --accent-rose: #f43f5e;
-  --rose-glow: rgba(244, 63, 94, 0.25);
+  --accent-amber: #fbbf24;
   
   --secondary: #ffffff;
-  --muted: #64748b;
-  --border: rgba(255, 255, 255, 0.05);
-  --border-bright: rgba(255, 255, 255, 0.1);
-  --glass-border: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+  --muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-bright: rgba(255, 255, 255, 0.15);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -62,8 +59,6 @@
   --accent-rose: #be123c;
   --accent-amber: #b45309;
   
-  --secondary: #0f172a; /* Dark text for light mode */
-  --muted: #475569;
   --border: rgba(0, 0, 0, 0.12);
   --border-bright: rgba(0, 0, 0, 0.2);
   
@@ -74,6 +69,7 @@
   --blob-1: rgba(79, 70, 229, 0.1);
   --blob-2: rgba(225, 29, 72, 0.06);
   --blob-3: rgba(5, 150, 105, 0.06);
+  --muted: #475569;
 }
 
 .light-mode body { color: var(--text-primary); }
@@ -162,79 +158,13 @@
 .light-mode .login-btn[style*="background: transparent"] { color: #0f172a !important; border-color: #cbd5e1 !important; }
 .light-mode input::placeholder { color: #475569 !important; font-weight: 500 !important; }
 .light-mode .bento-card p[style*="color: var(--muted)"],
-.light-mode .bento-card p[style*="color: #888"],
-.light-mode .bento-card div[style*="color: var(--muted)"],
-.light-mode .bento-card span[style*="color: var(--muted)"] {
+.light-mode .bento-card p[style*="color: #888"] {
   color: #475569 !important;
-}
-
-.light-mode .shimmer-btn {
-  background: #f1f5f9 !important;
-  border: 1px solid #cbd5e1 !important;
-}
-
-.light-mode .shimmer-btn i,
-.light-mode .shimmer-btn span {
-  color: #0f172a !important;
-}
-
-.light-mode .shimmer-btn:hover {
-  background: #e2e8f0 !important;
-  border-color: var(--accent) !important;
-}
-
-.light-mode #demo-chat-container div[style*="color: var(--muted)"] {
-  color: #64748b !important;
-}
-
-.light-mode button[style*="background: transparent"][style*="border: 1px solid rgba(255,255,255,0.1)"] {
-  border-color: #cbd5e1 !important;
-  color: #0f172a !important;
 }
 
 /* Global Scrollbar for Light Mode */
 .light-mode ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1) !important; }
 .light-mode ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2) !important; }
-
-/* ─── Specific Element Level Light Mode Fixes ─── */
-.light-mode .sidebar-header { border-bottom: 1px solid rgba(0,0,0,0.05) !important; }
-.light-mode .sidebar-footer { border-top: 1px solid rgba(0,0,0,0.05) !important; }
-.light-mode #sidebar-business-name { color: var(--text-primary) !important; }
-.light-mode #plan-badge { color: var(--text-secondary) !important; }
-.light-mode .sidebar-footer button { border: 1px solid rgba(0,0,0,0.1) !important; color: var(--text-muted) !important; }
-.light-mode .sidebar-footer button:hover { background: rgba(0,0,0,0.05) !important; }
-
-.light-mode .topbar .status-dot { box-shadow: 0 0 10px rgba(0,0,0,0.1) !important; }
-.light-mode .select-input { background: #fff !important; border: 1px solid #e2e8f0 !important; color: #0f172a !important; }
-
-.light-mode .bento-card.accent-rose .stat-label,
-.light-mode .bento-card.accent-rose .stat-value { color: var(--accent-rose) !important; }
-.light-mode .bento-card.accent-rose { border-color: rgba(244, 63, 94, 0.2) !important; }
-
-.light-mode .chat-bubble.bot {
-    background: #f1f5f9 !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #0f172a !important;
-}
-
-.light-mode .chat-bubble.bot b {
-    color: var(--accent) !important;
-}
-
-.light-mode .chat-bubble.user {
-    background: var(--accent) !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2) !important;
-}
-
-.light-mode .status-dot-pulsing {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
-}
-
-.light-mode .luxury-table tr:hover { background: rgba(0,0,0,0.02) !important; }
-.light-mode .badge-attention { box-shadow: 0 0 12px rgba(239, 68, 68, 0.2) !important; border: 1px solid rgba(0,0,0,0.05) !important; }
-
-/* ─── End Specific Fixes ─── */
 
 /* Global semantic classes for compatibility */
 .faq-q-text { color: #fff; }
@@ -304,10 +234,9 @@ body {
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  padding: 40px 24px;
+  padding: 32px 24px;
   position: relative;
   z-index: 100;
-  box-shadow: 10px 0 30px rgba(0,0,0,0.2);
 }
 
 .sidebar-logo {
@@ -378,7 +307,6 @@ body {
   overflow-y: auto;
   padding: 40px 60px;
   position: relative;
-  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .right-panel {
@@ -399,13 +327,9 @@ body {
 
 .page-title {
   font-family: var(--font-heading);
-  font-size: 2.8rem;
-  font-weight: 800;
-  letter-spacing: -0.045em;
-  background: linear-gradient(to bottom, #fff, #888);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .topbar-right {
@@ -472,57 +396,24 @@ button:active { transform: scale(0.96) !important; }
 }
 
 .bento-card {
-  background: var(--bg-card);
-  backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03); /* Clearer, cleaner background */
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-lg);
   padding: 32px;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-}
-
-.bento-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.5s;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .bento-card:hover { 
   border-color: var(--border-bright); 
-  transform: translateY(-6px) scale(1.005); 
-  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.5), 0 0 20px -5px var(--accent-glow);
+  transform: translateY(-4px); 
+  box-shadow: 0 20px 40px -20px var(--accent-glow);
 }
 
-.bento-card:hover::before { opacity: 1; }
-
-@keyframes glassShimmer {
-  0% { transform: translateX(-100%) skewX(-15deg); }
-  50% { transform: translateX(100%) skewX(-15deg); }
-  100% { transform: translateX(100%) skewX(-15deg); }
-}
-
-.shimmer-btn {
-  position: relative;
-  overflow: hidden;
-}
-
-.shimmer-btn::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; width: 30%; height: 100%;
-  background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
-  animation: glassShimmer 3s infinite ease-in-out;
-}
-
-.bento-card.accent-glow:hover { box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.5), 0 0 30px -5px var(--accent-glow); }
-.bento-card.accent-emerald:hover { box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.5), 0 0 30px -5px var(--emerald-glow); border-color: var(--accent-emerald); }
-.bento-card.accent-rose:hover { box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.5), 0 0 30px -5px var(--rose-glow); border-color: var(--accent-rose); }
+.bento-card.accent-emerald:hover { box-shadow: 0 20px 40px -20px var(--emerald-glow); border-color: var(--accent-emerald); }
+.bento-card.accent-rose:hover { box-shadow: 0 20px 40px -20px var(--rose-glow); border-color: var(--accent-rose); }
 
 .faq-luxury-card {
   background: rgba(10, 10, 15, 0.7) !important;

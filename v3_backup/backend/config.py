@@ -21,7 +21,6 @@ class Config:
     # Feature flags
     MOCK_MODE = os.getenv("MOCK_MODE", "true").lower() == "true"
     ADMIN_SECRET = os.getenv("ADMIN_SECRET", "admin123")
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "super-secret-jwt-key") # Change in production
 
 
 class DevelopmentConfig(Config):

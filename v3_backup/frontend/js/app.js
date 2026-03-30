@@ -34,12 +34,7 @@ const Toast = {
 const API = {
   async get(path) {
     try {
-      const headers = { "Content-Type": "application/json" };
-      const token = sessionStorage.getItem("chatiq_token");
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-
-      const r = await fetch(`${API_BASE}${path}`, { headers });
-      if (r.status === 401) { App.logout(false); return null; }
+      const r = await fetch(`${API_BASE}${path}`);
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return r.json();
     } catch (e) {
@@ -49,16 +44,11 @@ const API = {
   },
   async post(path, body) {
     try {
-      const headers = { "Content-Type": "application/json" };
-      const token = sessionStorage.getItem("chatiq_token");
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-
       const r = await fetch(`${API_BASE}${path}`, {
         method: "POST",
-        headers,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      if (r.status === 401 && path !== "/api/auth/login") { App.logout(false); return null; }
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return r.json();
     } catch (e) {
@@ -68,16 +58,11 @@ const API = {
   },
   async patch(path, body = {}) {
     try {
-      const headers = { "Content-Type": "application/json" };
-      const token = sessionStorage.getItem("chatiq_token");
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-
       const r = await fetch(`${API_BASE}${path}`, {
         method: "PATCH",
-        headers,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      if (r.status === 401) { App.logout(false); return null; }
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return r.json();
     } catch (e) {
@@ -87,12 +72,7 @@ const API = {
   },
   async delete(path) {
     try {
-      const headers = { "Content-Type": "application/json" };
-      const token = sessionStorage.getItem("chatiq_token");
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-
-      const r = await fetch(`${API_BASE}${path}`, { method: "DELETE", headers });
-      if (r.status === 401) { App.logout(false); return null; }
+      const r = await fetch(`${API_BASE}${path}`, { method: "DELETE" });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return r.json();
     } catch (e) {
@@ -132,26 +112,10 @@ async function loadBusinesses() {
 
 function updateSidebarMeta() {
   const b = State.currentBusiness;
-  const userJson = sessionStorage.getItem("chatiq_user");
-  const user = userJson ? JSON.parse(userJson) : null;
-
-  if (user) {
-    document.getElementById("sidebar-business-name").textContent = user.name || user.email;
-    // Update initials
-    const initials = (user.name || "Admin")
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-    const avatar = document.querySelector(".sidebar-footer div div:first-child");
-    if (avatar) avatar.textContent = initials;
-  }
-
-  if (b) {
-    document.getElementById("plan-badge").textContent =
-      (b.plan || "trial").charAt(0).toUpperCase() + (b.plan || "trial").slice(1) + " Plan";
-  }
+  if (!b) return;
+  document.getElementById("sidebar-business-name").textContent = b.name;
+  document.getElementById("plan-badge").textContent =
+    (b.plan || "trial").charAt(0).toUpperCase() + (b.plan || "trial").slice(1) + " Plan";
 }
 
 /* ─── Navigation ─── */
@@ -193,15 +157,7 @@ const App = {
 
   _currentPage: "dashboard",
 
-  async navigate(page) {
-    const mainContent = document.getElementById("main-content");
-    if (mainContent) {
-      mainContent.style.opacity = "0";
-      mainContent.style.transform = "translateY(10px)";
-    }
-    
-    await new Promise(r => setTimeout(r, 2000)); // Smooth cinematic pause
-    
+  navigate(page) {
     // Update nav
     document.querySelectorAll(".nav-item").forEach((el) => {
       el.classList.toggle("active", el.dataset.page === page);
@@ -222,12 +178,7 @@ const App = {
     document.getElementById("page-title").textContent = titles[page] || page;
 
     this._currentPage = page;
-    await this.loadPageData(page);
-    
-    if (mainContent) {
-      mainContent.style.opacity = "1";
-      mainContent.style.transform = "translateY(0)";
-    }
+    this.loadPageData(page);
     
     // Sync with mobile/sidebar UI
     document.querySelectorAll(".nav-item").forEach(item => {
@@ -604,65 +555,38 @@ const App = {
 
   checkAuth() {
     const token = sessionStorage.getItem("chatiq_token");
-    if (token) {
-      const overlay = document.getElementById("login-overlay");
-      if (overlay) overlay.style.display = "none";
+    if (token === "ok") {
+      document.getElementById("login-overlay").classList.add("hidden");
       return true;
     }
-    window.location.href = "/";
     return false;
-  },
-
-  toggleAuthMode(mode) {
-    const loginForm = document.getElementById("login-form");
-    const signupForm = document.getElementById("signup-form");
-    if (mode === 'signup') {
-      loginForm.style.display = "none";
-      signupForm.style.display = "block";
-    } else {
-      loginForm.style.display = "block";
-      signupForm.style.display = "none";
-    }
-  },
-
-  async signup(e) {
-    e.preventDefault();
-    const name = document.getElementById("signup-name").value;
-    const email = document.getElementById("signup-email").value;
-    const password = document.getElementById("signup-pass").value;
-    const errEl = document.getElementById("signup-error");
-    errEl.textContent = "";
-
-    const result = await API.post("/api/auth/signup", { name, email, password });
-    
-    if (result && result.access_token) {
-      sessionStorage.setItem("chatiq_token", result.access_token);
-      sessionStorage.setItem("chatiq_user", JSON.stringify(result.user));
-      document.getElementById("login-overlay").style.display = "none";
-      Toast.show(`Welcome, ${result.user.name}! 👋`, "success");
-      location.reload();
-    } else {
-      errEl.textContent = result?.error || "Signup failed. Please try again.";
-    }
   },
 
   async login(e) {
     e.preventDefault();
-    const email = document.getElementById("login-email").value;
     const password = document.getElementById("login-pass").value;
     const errEl = document.getElementById("login-error");
     errEl.textContent = "";
 
-    const result = await API.post("/api/auth/login", { email, password });
+    const result = await API.post("/api/auth", { password });
     
-    if (result && result.access_token) {
-      sessionStorage.setItem("chatiq_token", result.access_token);
-      sessionStorage.setItem("chatiq_user", JSON.stringify(result.user));
-      document.getElementById("login-overlay").style.display = "none";
-      Toast.show(`Welcome back! 👋`, "success");
-      location.reload();
+    if (result && result.token === "ok") {
+      sessionStorage.setItem("chatiq_token", "ok");
+      document.getElementById("login-overlay").classList.add("hidden");
+      Toast.show("Welcome back, Admin! 👋", "success");
+      location.reload(); // Refresh to load data properly
+    } else if (!result && password === "admin123") {
+      // Demo mode fallback when backend is unreachable
+      sessionStorage.setItem("chatiq_token", "ok");
+      document.getElementById("login-overlay").classList.add("hidden");
+      Toast.show("Welcome back! (Demo Mode) 👋", "info");
+      // We don't reload here so we can stay in the current offline state
+      await loadBusinesses();
+      await App.loadPageData("dashboard");
+      if (typeof initCharts === "function") initCharts();
+      if (typeof initDemoChat === "function") initDemoChat();
     } else {
-      errEl.textContent = result?.error || "Invalid email or password.";
+      errEl.textContent = result ? "Invalid secret. Please try again." : "Cannot connect to server. Valid demo secret required.";
       document.getElementById("login-pass").value = "";
     }
   },
@@ -791,15 +715,14 @@ const App = {
   },
 
   /* ─── LOGOUT ─── */
-  logout(manual = true) {
-    console.log("Logging out...", manual ? "manual" : "auto");
-    sessionStorage.clear();
-    window.location.replace("/");
-  },
-
-  loadPage(pageId) {
-    const navItem = document.querySelector(`.nav-item[data-page="${pageId}"]`);
-    if (navItem) navItem.click();
+  logout() {
+    if (!confirm("Are you sure you want to logout?")) return;
+    document.getElementById("login-overlay").style.display = "flex";
+    document.getElementById("app-container") && (document.getElementById("app-container").style.display = "none");
+    document.getElementById("login-pass").value = "";
+    State.token = null;
+    State.currentBusiness = null;
+    Toast.show("Logged out successfully.", "success");
   },
 
   /* ─── OPTIMIZE AI ─── */

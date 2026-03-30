@@ -9,9 +9,6 @@ from models.business import Business
 from models.faq import FAQ
 from models.lead import Lead
 from models.conversation import Conversation
-from models.user import User
-from flask_jwt_extended import JWTManager
-from flask_bcrypt import Bcrypt
 
 
 def create_app():
@@ -20,27 +17,19 @@ def create_app():
 
     CORS(app)
     db.init_app(app)
-    JWTManager(app)
-    Bcrypt(app)
 
     @app.route("/")
     def index():
         return app.send_static_file("index.html")
 
-    @app.route("/dashboard")
-    def dashboard():
-        return app.send_static_file("dashboard.html")
-
     # Register blueprints
     from routes.webhook import webhook_bp
     from routes.leads import leads_bp
     from routes.dashboard import dashboard_bp
-    from routes.auth import auth_bp
 
     app.register_blueprint(webhook_bp)
     app.register_blueprint(leads_bp)
     app.register_blueprint(dashboard_bp)
-    app.register_blueprint(auth_bp)
 
     with app.app_context():
         db.create_all()
