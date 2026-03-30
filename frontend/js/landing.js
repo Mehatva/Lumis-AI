@@ -236,4 +236,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initialize Google Auth on load
     App.initGoogleAuth();
+
+    // Check for URL parameters (Verification success/error)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('verified') === 'true') {
+        Toast.show("Email verified successfully! You can now log in.", "success");
+        App.openAuthModal('login');
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (urlParams.get('error') === 'invalid_token') {
+        Toast.show("Invalid or expired verification link.", "error");
+    }
 });

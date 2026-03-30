@@ -128,13 +128,16 @@ def google_login():
 def verify_email(token):
     user = User.query.filter_by(verification_token=token).first()
     if not user:
-        return jsonify({"error": "Invalid or expired verification token"}), 400
+        # If token is not found, check if it's already verified or just invalid
+        return redirect("http://localhost:5001/?error=invalid_token")
 
+    # Mark as verified
     user.is_verified = True
-    user.verification_token = None # Clear token after verification
+    user.verification_token = None 
     db.session.commit()
 
-    return jsonify({"message": "Email verified successfully! You can now log in."}), 200
+    # Redirect to landing page with success flag
+    return redirect("http://localhost:5001/?verified=true")
 
 @auth_bp.post("/api/auth/apple")
 def apple_login():
