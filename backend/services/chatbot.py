@@ -47,24 +47,27 @@ class IntentDetector:
         msg_words = normalized.split()
         score = 0
         
+        # Stop words to ignore during single-word matching
+        STOP_WORDS = {"how", "what", "where", "when", "why", "is", "are", "the", "a", "an", "do", "you", "get"}
+
         for kw in keywords:
             kw_norm = IntentDetector.normalize(kw)
-            # 1. Direct substring match (good for phrases)
+            kw_words = kw_norm.split()
+            
+            # 1. Direct phrase match (highest confidence)
             if kw_norm in normalized:
-                score += 1
+                # Give more weight to full phrase matches
+                score += (2 if len(kw_words) > 1 else 1)
                 continue
                 
-            # 2. Fuzzy word match (good for typos in single keywords)
-            kw_words = kw_norm.split()
-            for kw_word in kw_words:
-                best_word_score = 0
+            # 2. Fuzzy word match (only for meaningful words)
+            if len(kw_words) == 1:
+                if kw_norm in STOP_WORDS: continue # Skip common words as single triggers
+                
                 for msg_word in msg_words:
-                    # High threshold for accuracy (0.8)
-                    ratio = IntentDetector._levenshtein_ratio(msg_word, kw_word)
-                    if ratio >= 0.8:
-                        best_word_score = 1
+                    if IntentDetector._levenshtein_ratio(msg_word, kw_norm) >= 0.85:
+                        score += 1
                         break
-                score += best_word_score
         return score
 
     @staticmethod
@@ -121,31 +124,57 @@ class LeadCaptureFlow:
         state = conv.state
 
         if state == "capture_name":
-            conv.temp_name = user_message.strip()
+            # Smart name extraction
+            # Handles "My name is Ayman", "I am Ayman", etc.
+            clean = re.sub(r"(my name is|i am|i'm|call me|name is)\s+", "", user_message, flags=re.IGNORECASE).strip()
+            # Take the first 2 words max if it's long
+            name = " ".join(clean.split()[:2]).title()
+            conv.temp_name = name
             conv.state = "capture_phone"
             return (
-                f"Nice to meet you, *{conv.temp_name}*! 😊\n"
+                f"Nice to meet you, *{name}*! 😊\n"
                 "What's the best phone number to reach you on?"
             )
 
         if state == "capture_phone":
-            phone = user_message.strip()
-            # Save lead
-            lead = Lead(
-                business_id=business_id,
-                platform="instagram",
-                sender_id=conv.session_id,
-                name=conv.temp_name,
-                phone=phone,
-            )
-            db.session.add(lead)
-            db.session.commit()
-            conv.state = "idle"
-            conv.temp_name = None
+            # Extract only the phone number part (digits and optional +)
+            match = re.search(r"(\+?\d[\d\s\-]{9,}\d)", user_message)
+            phone = match.group(1).strip() if match else user_message.strip()
+            
+            conv.temp_phone = phone
+            conv.state = "confirm_details"
             return (
-                f"✅ Got it! We've saved your details and our team will reach out to "
-                f"*{phone}* shortly. Looking forward to connecting! 🎉"
+                f"Got it! Let me confirm those details:\n\n"
+                f"👤 Name: *{conv.temp_name}*\n"
+                f"📞 Phone: *{conv.temp_phone}*\n\n"
+                "Is this correct? (Reply *YES* to confirm or *NO* to edit) ✅"
             )
+
+        if state == "confirm_details":
+            choice = user_message.lower().strip()
+            if "yes" in choice or "correct" in choice or "ok" in choice:
+                # Find and update existing lead
+                lead = Lead.query.filter_by(business_id=business_id, sender_id=conv.session_id).first()
+                if not lead:
+                    lead = Lead(business_id=business_id, platform="instagram", sender_id=conv.session_id)
+                    db.session.add(lead)
+                
+                lead.name = conv.temp_name
+                lead.phone = conv.temp_phone
+                lead.needs_attention = True  # New leads need attention
+                
+                db.session.commit()
+                conv.state = "idle"
+                name, phone = conv.temp_name, conv.temp_phone
+                conv.temp_name = None
+                conv.temp_phone = None
+                return (
+                    f"✅ All set, *{name}*! We've saved your details and our team will reach out to "
+                    f"*{phone}* shortly. Looking forward to connecting! 🎉"
+                )
+            elif "no" in choice or "wrong" in choice or "edit" in choice:
+                conv.state = "capture_name"
+                return "No problem! Let's try again. 😊\n\nWhat is your *name*?"
 
         return None  # Not in a capture state
 
@@ -176,14 +205,39 @@ class ChatbotService:
         conv = self.get_or_create_conversation(session_id)
         conv.add_message("user", user_message)
 
+        # 0. Ensure a lead placeholder exists for tracking
+        lead = Lead.query.filter_by(business_id=self.business.id, sender_id=session_id).first()
+        if not lead:
+            lead = Lead(
+                business_id=self.business.id,
+                platform="instagram",
+                sender_id=session_id,
+                note=f"First contact: {user_message[:50]}..."
+            )
+            db.session.add(lead)
+            db.session.commit()
+
         # 1. Handle active lead capture flow
-        if conv.state in ("capture_name", "capture_phone"):
+        if conv.state in ("capture_name", "capture_phone", "confirm_details"):
             reply = LeadCaptureFlow.handle(conv, user_message, self.business.id)
             conv.add_message("bot", reply)
             db.session.commit()
             return reply
 
-        # 2. Check if user explicitly wants to be contacted
+        # 2. Human Escape Hatch
+        human_keywords = ["human", "real person", "specialist", "agent", "manager", "talk to someone"]
+        if any(kw in user_message.lower() for kw in human_keywords):
+            reply = (
+                "I understand! I'm flagging this conversation for our *Team Specialist* right now. 🔔\n"
+                "They will review our chat and get back to you here as soon as possible. "
+                "Is there anything specific you'd like them to know? 😊"
+            )
+            lead.needs_attention = True
+            db.session.commit()
+            conv.add_message("bot", reply)
+            return reply
+
+        # 3. Check if user explicitly wants to be contacted
         if LeadCaptureFlow.should_trigger(user_message) and conv.state == "idle":
             conv.state = "capture_name"
             db.session.commit()
@@ -195,34 +249,24 @@ class ChatbotService:
             db.session.commit()
             return reply
 
-        # 3. FAQ intent matching
+        # 4. Personalized AI Response (RAG)
         faqs = FAQ.query.filter_by(business_id=self.business.id).all()
-        matched_faq = IntentDetector.find_best_faq(user_message, faqs)
+        history = conv.get_messages()
+        reply = self.ai.get_reply(history, user_message, faqs)
 
-        if matched_faq:
-            reply = ResponseBuilder.build(matched_faq)
-        else:
-            # 4. AI fallback (The "2% solution")
-            history = conv.get_messages()
-            reply = self.ai.get_reply(history, user_message)
-
-            # Flag for human attention in the Lead Inbox
-            lead = Lead.query.filter_by(business_id=self.business.id, sender_id=session_id).first()
-            if not lead:
-                # Create a "Ghost Lead" so the owner sees the unanswered question
-                lead = Lead(
-                    business_id=self.business.id,
-                    platform="instagram",
-                    sender_id=session_id,
-                    note=f"Unanswered: {user_message[:50]}..."
-                )
-                db.session.add(lead)
+        # 5. Intelligence: Flag for human attention if it's an AI fallback
+        if "personally flagged this" in reply:
             lead.needs_attention = True
-            db.session.commit()
+        
+        # Update note with latest activity if name isn't set yet
+        if not lead.name:
+            lead.note = f"Latest activity: {user_message[:50]}..."
 
-        # Append a light CTA nudge for non-lead messages (only randomly, ~20%)
+        db.session.commit()
+
+        # Append a light CTA nudge randomly (~15%)
         import random
-        if matched_faq and self.business.booking_url and random.random() < 0.2:
+        if self.business.booking_url and random.random() < 0.15:
             reply += f"\n\n💬 Have more questions? Just ask!"
 
         conv.add_message("bot", reply)

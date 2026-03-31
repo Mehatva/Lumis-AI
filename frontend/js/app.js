@@ -2,7 +2,9 @@
    Lumis AI Dashboard — App Logic
    ═══════════════════════════════════════════════════════════════════════ */
 
-const API_BASE = "http://localhost:5001";
+const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" 
+  ? "http://localhost:5001" 
+  : ""; // On production, use relative paths
 
 /* ─── State ─── */
 const State = {
@@ -107,12 +109,14 @@ async function loadBusinesses() {
   const businesses = await API.get("/api/businesses");
 
   if (!businesses || businesses.length === 0) {
-    // Demo mode: use mock data so dashboard looks great without a server
-    State.businesses = mockBusinesses();
-    State.currentBusiness = State.businesses[0];
+    State.businesses = [];
+    State.currentBusiness = null;
+    // Show Onboarding for new users
+    App.showOnboarding();
   } else {
     State.businesses = businesses;
     State.currentBusiness = businesses[0];
+    document.getElementById("onboarding-overlay").classList.add("hidden");
   }
 
   const select = document.getElementById("business-select");
@@ -191,6 +195,89 @@ const App = {
     }
   },
 
+  // ─── Onboarding (SaaS Flow) ───
+  showOnboarding() {
+    const overlay = document.getElementById("onboarding-overlay");
+    if (overlay) overlay.classList.remove("hidden");
+    this.onboardNextStep(1);
+    if (window.lucide) lucide.createIcons();
+  },
+
+  onboardNextStep(step) {
+    [1, 2, 3].forEach(s => {
+      const el = document.getElementById(`onboard-step-${s}`);
+      if (el) el.classList.toggle("hidden", s !== step);
+    });
+  },
+
+  onboardPrevStep(current, prev) {
+    this.onboardNextStep(prev);
+  },
+
+  async onboardCreateBusiness(e) {
+    e.preventDefault();
+    const name = document.getElementById("onboard-name").value.trim();
+    const niche = document.getElementById("onboard-niche").value;
+    
+    const result = await API.post("/api/businesses", { name, niche });
+    if (result) {
+      State.currentBusiness = result;
+      State.businesses.push(result);
+      this.onboardNextStep(2);
+      Toast.show("Business profile established. Proceeding to plans...", "success");
+    } else {
+      Toast.show("Failed to create business. Please try again.", "error");
+    }
+  },
+
+  async onboardSelectPlan(plan) {
+    const bid = State.currentBusiness?.id;
+    if (!bid) return;
+
+    Toast.show(`Preparing ${plan} subscription...`, "info");
+    
+    const result = await API.post("/api/billing/create-checkout-session", { 
+      business_id: bid, 
+      plan 
+    });
+
+    if (result && result.url) {
+      window.location.href = result.url;
+    } else {
+      // Demo Fallback: If Stripe is not configured, just proceed
+      Toast.show("Direct access granted (Demo Mode). Setting up AI...", "warning");
+      this.onboardNextStep(3);
+    }
+  },
+
+  async onboardRunMagic(e) {
+    e.preventDefault();
+    const bid = State.currentBusiness?.id;
+    const url = document.getElementById("onboard-url").value.trim();
+    if (!bid || !url) return;
+
+    const btn = document.getElementById("onboard-import-btn");
+    btn.disabled = true;
+    btn.innerHTML = `<span class="pulse-loader small"></span> Building Assistant...`;
+
+    const result = await API.post(`/api/businesses/${bid}/auto-kb`, { url });
+    
+    if (result) {
+      Toast.show(`Magic! AI has learned ${result.new_count || 'many'} things about your brand.`, "success");
+      this.onboardComplete();
+    } else {
+      Toast.show("AI Setup complete with basic knowledge. You can refine it later.", "info");
+      this.onboardComplete();
+    }
+  },
+
+  onboardComplete() {
+    const overlay = document.getElementById("onboarding-overlay");
+    if (overlay) overlay.classList.add("hidden");
+    Toast.show("Welcome to the platform! Your AI is ready. 🚀", "success");
+    location.reload(); // Hard refresh to sync all stats
+  },
+
   _currentPage: "dashboard",
 
   async navigate(page) {
@@ -218,6 +305,7 @@ const App = {
       faqs: "FAQ Manager",
       leads: "Lead Inbox",
       settings: "Settings",
+      help: "Help & Support",
     };
     document.getElementById("page-title").textContent = titles[page] || page;
 
@@ -228,6 +316,9 @@ const App = {
       mainContent.style.opacity = "1";
       mainContent.style.transform = "translateY(0)";
     }
+    
+    // Refresh icons for new content
+    if (window.lucide) lucide.createIcons();
     
     // Sync with mobile/sidebar UI
     document.querySelectorAll(".nav-item").forEach(item => {
@@ -249,7 +340,7 @@ const App = {
 
   async _loadDashboard(bid) {
     let analytics = await API.get(`/api/businesses/${bid}/analytics`);
-    if (!analytics) analytics = mockAnalytics();
+    if (!analytics) analytics = { total_leads: 0, needs_attention_count: 0, conversion_rate: 0, total_faqs: 0 };
     State.analytics = analytics;
 
     const set = (id, val) => {
@@ -280,7 +371,7 @@ const App = {
 
   async _loadFaqs(bid) {
     let faqs = await API.get(`/api/businesses/${bid}/faqs`);
-    if (!faqs) faqs = mockFaqs();
+    if (!faqs) faqs = [];
     State.faqs = faqs;
     this._renderFaqs(faqs);
   },
@@ -469,7 +560,7 @@ const App = {
 
   async _loadLeads(bid) {
     let leads = await API.get(`/api/leads/${bid}`);
-    if (!leads) leads = mockLeads();
+    if (!leads) leads = [];
     State.leads = leads;
     this._renderLeads(leads);
   },

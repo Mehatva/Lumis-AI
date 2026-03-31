@@ -13,6 +13,8 @@ from app import create_app
 from models import db
 from models.business import Business
 from models.faq import FAQ
+from models.lead import Lead
+from models.conversation import Conversation
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data", "businesses")
 
@@ -21,7 +23,10 @@ def seed():
     app = create_app()
     with app.app_context():
         # Clear existing data
+        print("🧹 Clearing existing data...")
         FAQ.query.delete()
+        Lead.query.delete()
+        Conversation.query.delete()
         Business.query.delete()
         db.session.commit()
 
@@ -41,9 +46,13 @@ def seed():
                 welcome_message=data.get("welcome_message"),
                 tone=data.get("tone", "friendly"),
                 plan="trial",
-                api_key=secrets.token_urlsafe(32),
                 is_active=True,
             )
+            # Use environment variable for Instagram Page ID if available
+            env_page_id = os.getenv("INSTAGRAM_PAGE_ID")
+            if env_page_id:
+                business.instagram_page_id = env_page_id
+            
             db.session.add(business)
             db.session.flush()  # Get business.id
 

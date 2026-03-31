@@ -3,70 +3,130 @@ AI Service — OpenAI GPT fallback for unmatched queries.
 """
 import os
 from openai import OpenAI
+try:
+    from groq import Groq
+except ImportError:
+    Groq = None
 
-_client = None
+_openai_client = None
+_groq_client = None
 
 
-def get_client():
-    global _client
-    if _client is None:
+def get_openai_client():
+    global _openai_client
+    if _openai_client is None:
         import httpx
-        # Use a bare client; avoid deprecated 'proxies' argument
-        http_client = httpx.Client()
-        _client = OpenAI(
+        _openai_client = OpenAI(
             api_key=os.getenv("OPENAI_API_KEY", ""),
-            http_client=http_client
+            http_client=httpx.Client()
         )
-    return _client
+    return _openai_client
+
+
+def get_groq_client():
+    global _groq_client
+    if _groq_client is None and Groq:
+        import httpx
+        _groq_client = Groq(
+            api_key=os.getenv("GROQ_API_KEY", ""),
+            http_client=httpx.Client()
+        )
+    return _groq_client
 
 
 class AIService:
     def __init__(self, business):
         self.business = business
 
-    def _system_prompt(self) -> str:
+    def _system_prompt(self, faqs_text: str = "") -> str:
         b = self.business
-        return (
+        prompt = (
             f"You are a helpful customer support chatbot for *{b.name}*, "
             f"a {b.niche} business located at {b.location or 'their location'}. "
             f"Your tone is {b.tone or 'friendly'}. "
             "Keep replies short (2–4 sentences), helpful, and conversational. "
-            "Use emojis sparingly. Never make up prices or information you don't know. "
-            "If you don't have enough information, kindly ask them to contact the business directly. "
-            f"Booking link: {b.booking_url or 'N/A'}. "
+            "Use emojis sparingly. Never make up prices or information you don't know.\n\n"
+            "**STRICT FORMATTING RULES:**\n"
+            "- ALWAYS use bullet points (•) for lists like timings, membership plans, or classes.\n"
+            "- ALWAYS use bold text (with asterisks, like *text*) for key terms, prices (e.g., *₹999*), and headers.\n"
+            "- Use clean line breaks to separate different pieces of information.\n\n"
+            "**EXAMPLE OF A PERFECT RESPONSE:**\n"
+            "\"Hey! Here are our current *Membership Plans* at FlexZone Gym:\n"
+            "• *Basic*: ₹999/month (Gym access 6am–10pm)\n"
+            "• *Standard*: ₹1,499/month (Includes 2 Group classes/week)\n\n"
+            "Does one of these fit what you're looking for? 💪\""
+        )
+        
+        if faqs_text:
+            prompt += (
+                "\n\nUse the following Business FAQs to provide the most accurate answers. "
+                "If the user's question is answered in the FAQs, use that information "
+                "to craft a personalized, friendly response. If not, follow general guidelines."
+                f"\n--- BUSINESS FAQs ---\n{faqs_text}\n"
+            )
+        else:
+            prompt += "\n\nIf you don't have enough information, kindly ask them to contact the business directly. "
+
+        prompt += (
+            f"\nBooking link: {b.booking_url or 'N/A'}. "
             f"Phone: {b.phone or 'N/A'}."
         )
+        return prompt
 
-    def get_reply(self, history: list, message: str) -> str:
+    def get_reply(self, history: list, message: str, faqs: list = None) -> str:
         """
-        Call OpenAI Chat Completions with conversation history.
-        Falls back to a polite default if the API call fails or key is missing.
+        Call Groq (preferred) or OpenAI Chat Completions with conversation history and FAQ context.
         """
-        api_key = os.getenv("OPENAI_API_KEY", "")
-        if not api_key or api_key.startswith("sk-..."):
-            return self._fallback_reply()
+        groq_api_key = os.getenv("GROQ_API_KEY", "")
+        openai_api_key = os.getenv("OPENAI_API_KEY", "")
 
-        try:
-            messages = [{"role": "system", "content": self._system_prompt()}]
+        faqs_text = ""
+        if faqs:
+            for f in faqs:
+                faqs_text += f"- Q: {f.question}\n  A: {f.response}\n"
 
-            # Add last 6 messages for context
-            for msg in history[-6:]:
-                role = "assistant" if msg["role"] == "bot" else "user"
-                messages.append({"role": role, "content": msg["text"]})
+        system_content = self._system_prompt(faqs_text)
 
-            messages.append({"role": "user", "content": message})
+        # 1. Try Groq (Free and Fast)
+        if groq_api_key and Groq:
+            try:
+                messages = [{"role": "system", "content": system_content}]
+                for msg in history[-6:]:
+                    role = "assistant" if msg["role"] == "bot" else "user"
+                    messages.append({"role": role, "content": msg["text"]})
+                messages.append({"role": "user", "content": message})
 
-            response = get_client().chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=messages,
-                max_tokens=200,
-                temperature=0.7,
-            )
-            return response.choices[0].message.content.strip()
+                client = get_groq_client()
+                response = client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=messages,
+                    max_tokens=300,
+                    temperature=0.7,
+                )
+                return response.choices[0].message.content.strip()
+            except Exception as e:
+                print(f"[AIService] Groq error: {e}")
 
-        except Exception as e:
-            print(f"[AIService] OpenAI error: {e}")
-            return self._fallback_reply()
+        # 2. Fallback to OpenAI
+        if openai_api_key and not openai_api_key.startswith("sk-..."):
+            try:
+                messages = [{"role": "system", "content": system_content}]
+                for msg in history[-6:]:
+                    role = "assistant" if msg["role"] == "bot" else "user"
+                    messages.append({"role": role, "content": msg["text"]})
+                messages.append({"role": "user", "content": message})
+
+                response = get_openai_client().chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=messages,
+                    max_tokens=200,
+                    temperature=0.7,
+                )
+                return response.choices[0].message.content.strip()
+            except Exception as e:
+                print(f"[AIService] OpenAI error: {e}")
+
+        return self._fallback_reply()
 
     def _fallback_reply(self) -> str:
         b = self.business
@@ -115,7 +175,7 @@ class AIService:
                 ]
 
         try:
-            response = get_client().chat.completions.create(
+            response = get_openai_client().chat.completions.create(
                 model="gpt-4o-mini",  # Using 4o-mini for cost-effective extraction
                 messages=[{"role": "system", "content": "You are a professional JSON generator."},
                           {"role": "user", "content": prompt}],

@@ -20,6 +20,8 @@ class Business(db.Model):
     trial_expires_at = db.Column(db.DateTime)
     is_active = db.Column(db.Boolean, default=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True) # Temporarily nullable for existing data
+    stripe_customer_id = db.Column(db.String(120), nullable=True)
+    stripe_subscription_id = db.Column(db.String(120), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     faqs = db.relationship("FAQ", backref="business", lazy=True, cascade="all, delete-orphan")
@@ -40,5 +42,7 @@ class Business(db.Model):
             "plan": self.plan,
             "user_id": self.user_id,
             "is_active": self.is_active,
+            "stripe_customer_id": self.stripe_customer_id,
+            "stripe_subscription_id": self.stripe_subscription_id,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

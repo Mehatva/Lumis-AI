@@ -60,13 +60,17 @@ def handle_instagram():
         sender_id = msg["sender_id"]
         text = msg["text"]
 
+        # 1. Send typing indicator to create a natural feeling
+        insta.send_typing_indicator(sender_id, on=True)
+
         current_app.logger.info(f"[Live Webhook] From {sender_id} to Page {page_id}: {text}")
 
-        # Generate response using AI engine
+        # 2. Generate response using AI engine
         reply = chatbot.process(sender_id, text)
         
-        # Dispatch to real Meta API
+        # 3. Dispatch reply and turn off typing
         insta.send_message(sender_id, reply)
+        insta.send_typing_indicator(sender_id, on=False)
 
     return jsonify({"status": "ok"}), 200
 

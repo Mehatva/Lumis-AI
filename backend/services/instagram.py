@@ -44,6 +44,35 @@ class InstagramService:
             print(f"[InstagramService] parse error: {e}")
         return messages
 
+    def send_typing_indicator(self, recipient_id: str, on: bool = True) -> dict:
+        """
+        Send a typing indicator to a user.
+        on=True: "typing_on", on=False: "typing_off"
+        """
+        mock_mode = os.getenv("MOCK_MODE", "true").lower() == "true"
+        if mock_mode:
+            print(f"[MOCK] Typing indicator {'ON' if on else 'OFF'} for {recipient_id}")
+            return {"mock": True}
+
+        if not self.access_token:
+            return {"error": "missing_token"}
+
+        action = "typing_on" if on else "typing_off"
+        url = f"{GRAPH_API_BASE}/me/messages"
+        payload = {
+            "recipient": {"id": recipient_id},
+            "sender_action": action
+        }
+        params = {"access_token": self.access_token}
+
+        try:
+            r = requests.post(url, json=payload, params=params, timeout=10)
+            r.raise_for_status()
+            return r.json()
+        except Exception as e:
+            print(f"[InstagramService] Typing indicator error: {e}")
+            return {"error": str(e)}
+
     # ─── Send message ──────────────────────────────────────────────────────
 
     def send_message(self, recipient_id: str, text: str) -> dict:

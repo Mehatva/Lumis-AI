@@ -10,4 +10,6 @@ beautifulsoup4==4.12.3
 flask-bcrypt==1.0.1
 flask-jwt-extended==4.7.1
 google-auth==2.29.0
+groq==0.8.0
+stripe==9.10.0
 

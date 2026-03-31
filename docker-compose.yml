@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  lumis-ai:
+    build: .
+    container_name: lumis_ai_app
+    restart: always
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./backend/instance:/app/backend/instance
+    env_file:
+      - ./backend/.env
+    environment:
+      - FLASK_ENV=production
+      - MOCK_MODE=false
+      - PYTHONPATH=/app/backend
