@@ -142,15 +142,7 @@ def delete_faq(faq_id):
 @jwt_required()
 def get_analytics(business_id):
     user_id = get_jwt_identity()
-    business = Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
-    
-    # HARD GATE: If no paid plan yet, restrict analytics
-    if business.plan == "trial":
-        return jsonify({
-            "error": "Payment Required",
-            "message": "Please complete your onboarding and select a plan to unlock analytics."
-        }), 402
-
+    Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
     total_conversations = Conversation.query.filter_by(business_id=business_id).count()
     total_leads = Lead.query.filter_by(business_id=business_id).count()
     converted_leads = Lead.query.filter_by(business_id=business_id, is_converted=True).count()

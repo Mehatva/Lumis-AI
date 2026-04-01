@@ -24,8 +24,6 @@ class Config:
     ADMIN_SECRET = os.getenv("ADMIN_SECRET", "admin123")
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "super-secret-jwt-key") # Change in production
     GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
-    META_APP_ID = os.getenv("META_APP_ID", "")
-    META_APP_SECRET = os.getenv("META_APP_SECRET", "")
 
 
 class DevelopmentConfig(Config):

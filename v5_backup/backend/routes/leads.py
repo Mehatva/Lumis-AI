@@ -12,15 +12,7 @@ leads_bp = Blueprint("leads", __name__)
 @jwt_required()
 def get_leads(business_id):
     user_id = get_jwt_identity()
-    business = Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
-    
-    # HARD GATE: If no paid plan yet, restrict leads access
-    if business.plan == "trial":
-        return jsonify({
-            "error": "Payment Required",
-            "message": "Please complete your onboarding and select a plan to unlock your Lead Inbox."
-        }), 402
-
+    Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
     leads = Lead.query.filter_by(business_id=business_id).order_by(Lead.captured_at.desc()).all()
     return jsonify([l.to_dict() for l in leads])
 

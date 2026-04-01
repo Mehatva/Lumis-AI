@@ -25,7 +25,6 @@ const Toast = {
 // ─── AUTHENTICATION ───
 const App = {
     openAuthModal(mode = 'signup') {
-        console.log("[App] Opening Auth Modal in mode:", mode);
         const overlay = document.getElementById("login-overlay");
         overlay.classList.remove("hidden");
         this.toggleAuthMode(mode);
@@ -36,7 +35,6 @@ const App = {
     },
 
     toggleAuthMode(mode) {
-        console.log("[App] Toggling Auth Mode to:", mode);
         const loginForm = document.getElementById("login-form");
         const signupForm = document.getElementById("signup-form");
         if (mode === 'signup') {
@@ -50,7 +48,6 @@ const App = {
 
     async signup(e) {
         e.preventDefault();
-        console.log("[App] Signup Form Submitted");
         const name = document.getElementById("signup-name").value;
         const email = document.getElementById("signup-email").value;
         const password = document.getElementById("signup-pass").value;
@@ -100,8 +97,7 @@ const App = {
                 sessionStorage.setItem("chatiq_token", result.access_token);
                 sessionStorage.setItem("chatiq_user", JSON.stringify(result.user));
                 Toast.show("Welcome back!");
-                this.closeAuthModal();
-                this.checkSession(); // Update UI immediately
+                setTimeout(() => window.location.href = "/dashboard", 1000);
             } else {
                 errEl.textContent = result.error || "Invalid credentials.";
             }
@@ -194,164 +190,13 @@ const App = {
         errEl.textContent = "";
         
         Toast.show(`${provider.charAt(0).toUpperCase() + provider.slice(1)} integration is in Demo Mode.`, "warning");
-    },
-
-    // ─── SESSION & UI ───
-    async checkSession() {
-        const token = sessionStorage.getItem("chatiq_token");
-        const user = JSON.parse(sessionStorage.getItem("chatiq_user") || "null");
         
-        if (!token || !user) {
-            this.updateUIForGuest();
-            return;
+        // Stubs for future implementation
+        if (provider === 'apple') {
+            console.log("Apple Login Triggered");
+        } else if (provider === 'instagram') {
+            console.log("Instagram Login Triggered");
         }
-
-        try {
-            const r = await fetch(`${API_BASE}/api/dashboard/summary`, {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            const data = await r.json();
-            
-            const hasBusiness = data.businesses && data.businesses.length > 0;
-            this.updateUIForUser(user, hasBusiness);
-            this._hasBusiness = hasBusiness;
-        } catch (e) {
-            console.error("Session check failed:", e);
-            this.updateUIForGuest();
-        }
-    },
-
-    updateUIForGuest() {
-        document.getElementById("nav-links-guest").classList.remove("hidden");
-        document.getElementById("nav-links-user").classList.add("hidden");
-        document.getElementById("hero-actions-guest").classList.remove("hidden");
-        document.getElementById("hero-actions-user").classList.add("hidden");
-    },
-
-    updateUIForUser(user, hasBusiness) {
-        document.getElementById("nav-links-guest").classList.add("hidden");
-        document.getElementById("nav-links-user").classList.remove("hidden");
-        document.getElementById("hero-actions-guest").classList.add("hidden");
-        document.getElementById("hero-actions-user").classList.remove("hidden");
-        
-        document.getElementById("user-display-name").textContent = `Welcome, ${user.name || 'User'}`;
-        
-        const primaryBtn = document.getElementById("hero-primary-btn");
-        if (hasBusiness) {
-            primaryBtn.textContent = "Go to Dashboard";
-            primaryBtn.onclick = () => window.location.href = "/dashboard";
-        } else {
-            primaryBtn.textContent = "Complete Setup";
-            primaryBtn.onclick = () => this.openOnboarding();
-        }
-
-        lucide.createIcons();
-    },
-
-    logout() {
-        sessionStorage.clear();
-        window.location.reload();
-    },
-
-    handleHeroAction() {
-        if (this._hasBusiness) {
-            window.location.href = "/dashboard";
-        } else {
-            this.openOnboarding();
-        }
-    },
-
-    // ─── ONBOARDING WIZARD ───
-    openOnboarding() {
-        document.getElementById("onboarding-overlay").classList.remove("hidden");
-        this.onboardShowStep(1);
-    },
-
-    closeOnboarding() {
-        document.getElementById("onboarding-overlay").classList.add("hidden");
-    },
-
-    onboardShowStep(step) {
-        // Hide all steps
-        for (let i = 1; i <= 3; i++) {
-            const el = document.getElementById(`onboard-step-${i}`);
-            if (el) el.classList.add("hidden");
-        }
-        // Show target step
-        const target = document.getElementById(`onboard-step-${step}`);
-        if (target) target.classList.remove("hidden");
-        lucide.createIcons();
-    },
-
-    async onboardCreateBusiness(e) {
-        e.preventDefault();
-        const name = document.getElementById("onboard-name").value;
-        const niche = document.getElementById("onboard-niche").value;
-        const token = sessionStorage.getItem("chatiq_token");
-
-        try {
-            const r = await fetch(`${API_BASE}/api/dashboard/business`, {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify({ name, niche })
-            });
-            if (r.ok) {
-                Toast.show("Business profile established! ✨");
-                this.onboardShowStep(2);
-            } else {
-                Toast.show("Failed to create business.", "error");
-            }
-        } catch (e) {
-            Toast.show("Server error.", "error");
-        }
-    },
-
-    onboardSelectPlan(plan) {
-        Toast.show(`${plan.charAt(0).toUpperCase() + plan.slice(1)} plan selected!`);
-        this.onboardShowStep(3);
-    },
-
-    onboardPrevStep(current, prev) {
-        this.onboardShowStep(prev);
-    },
-
-    async onboardRunMagic(e) {
-        e.preventDefault();
-        const url = document.getElementById("onboard-url").value;
-        const btn = document.getElementById("onboard-import-btn");
-        const token = sessionStorage.getItem("chatiq_token");
-
-        btn.disabled = true;
-        btn.textContent = "AI is analyzing your brand...";
-
-        try {
-            const r = await fetch(`${API_BASE}/api/dashboard/train`, {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify({ url })
-            });
-            if (r.ok) {
-                Toast.show("AI Setup Complete! Redirecting to your dashboard...");
-                setTimeout(() => window.location.href = "/dashboard", 2000);
-            } else {
-                Toast.show("Training failed. Please try again.", "error");
-                btn.disabled = false;
-                btn.textContent = "Build My AI Assistant";
-            }
-        } catch (e) {
-            Toast.show("Server error.", "error");
-            btn.disabled = false;
-        }
-    },
-
-    onboardComplete() {
-        window.location.href = "/dashboard";
     }
 };
 
@@ -384,8 +229,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     
-    // Check for session status
-    App.checkSession();
+    // Check if already logged in
+    const token = sessionStorage.getItem("chatiq_token");
+    if (token) {
+        // Option to redirect to dashboard immediately
+        // window.location.href = "/dashboard";
+    }
+
+    // Initialize Google Auth on load
+    App.initGoogleAuth();
 
     // Check for URL parameters (Verification success/error)
     const urlParams = new URLSearchParams(window.location.search);

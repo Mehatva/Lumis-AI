@@ -45,10 +45,7 @@ def create_app():
     app.register_blueprint(billing_bp)
 
     with app.app_context():
-        try:
-            db.create_all()
-        except Exception as e:
-            print(f"DEBUG: db.create_all error (mostly harmless in production): {e}")
+        db.create_all()
 
     return app
 

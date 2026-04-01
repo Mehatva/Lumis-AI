@@ -1,0 +1,44 @@
+{
+  "name": "Glam Studio Salon",
+  "niche": "salon",
+  "phone": "+91 98123 45678",
+  "location": "45 Beauty Lane, Koregaon Park, Pune",
+  "location_url": "https://maps.google.com/?q=Glam+Studio+Salon+Pune",
+  "booking_url": "https://glamstudio.setmore.com",
+  "welcome_message": "Hi gorgeous! 💅 Welcome to Glam Studio. How can I help you today?\n\nAsk me about:\n• Services & pricing\n• Appointments\n• Timings\n• Location",
+  "tone": "friendly",
+  "faqs": [
+    {
+      "question": "Services & Pricing",
+      "keywords": ["price", "cost", "service", "services", "charges", "haircut", "facial", "waxing", "hair", "treatment", "how much", "kitna"],
+      "response": "💇 *Glam Studio Services:*\n\n✂️ *Hair*\n   Haircut — ₹299 onwards\n   Hair colour — ₹999 onwards\n   Keratin treatment — ₹2,499\n\n💆 *Skin & Face*\n   Classic facial — ₹599\n   Gold facial — ₹999\n   Cleanup — ₹349\n\n🙆 *Body*\n   Full body waxing — ₹799\n   Threading — ₹50/session\n\nWant to book an appointment? 📅",
+      "cta_label": "Book Appointment",
+      "cta_url": "https://glamstudio.setmore.com",
+      "priority": 10
+    },
+    {
+      "question": "Appointment Booking",
+      "keywords": ["book", "booking", "appointment", "slot", "available", "schedule", "reserve", "when can"],
+      "response": "📅 Booking is easy! You can:\n\n1️⃣ Click the link below to book online\n2️⃣ Call us at +91 98123 45678\n3️⃣ Walk in (subject to availability)\n\n💡 *Tip:* Book at least 1 day in advance for weekends!",
+      "cta_label": "Book Now",
+      "cta_url": "https://glamstudio.setmore.com",
+      "priority": 9
+    },
+    {
+      "question": "Timings",
+      "keywords": ["timing", "timings", "open", "hours", "time", "kab", "close", "when"],
+      "response": "⏰ *Glam Studio Timings:*\n\n📅 Tuesday–Sunday: 10:00 AM – 8:00 PM\n❌ Closed on Mondays\n\nWalk-ins welcome during working hours! 💕",
+      "cta_label": null,
+      "cta_url": null,
+      "priority": 8
+    },
+    {
+      "question": "Location",
+      "keywords": ["location", "address", "where", "kahan", "directions", "map", "find"],
+      "response": "📍 *Glam Studio* is located at:\n45 Beauty Lane, Koregaon Park, Pune\n\nNear the ABC Mall, ground floor. Free parking available! 🚗",
+      "cta_label": "Get Directions",
+      "cta_url": "https://maps.google.com/?q=Glam+Studio+Salon+Pune",
+      "priority": 7
+    }
+  ]
+}

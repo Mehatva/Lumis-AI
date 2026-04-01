@@ -109,12 +109,13 @@ async function loadBusinesses() {
   const businesses = await API.get("/api/businesses");
 
   if (!businesses || businesses.length === 0) {
-    console.log("No business found, redirecting to landing page for onboarding.");
-    window.location.href = "/"; // Redirect to landing page onboarding
+    State.businesses = [];
+    State.currentBusiness = null;
+    // Show Onboarding for new users
+    App.showOnboarding();
   } else {
     State.businesses = businesses;
     State.currentBusiness = businesses[0];
-    document.body.classList.remove("dashboard-locked");
     document.getElementById("onboarding-overlay").classList.add("hidden");
   }
 
@@ -198,7 +199,6 @@ const App = {
   showOnboarding() {
     const overlay = document.getElementById("onboarding-overlay");
     if (overlay) overlay.classList.remove("hidden");
-    document.body.classList.add("dashboard-locked");
     this.onboardNextStep(1);
     if (window.lucide) lucide.createIcons();
   },
@@ -296,7 +296,6 @@ const App = {
   },
 
   onboardComplete() {
-    document.body.classList.remove("dashboard-locked");
     const overlay = document.getElementById("onboarding-overlay");
     if (overlay) overlay.classList.add("hidden");
     Toast.show("Welcome to the platform! Your AI is ready. 🚀", "success");
@@ -729,24 +728,6 @@ const App = {
     } else {
       Object.assign(State.currentBusiness, body);
       Toast.show("Integrations saved locally (demo mode)", "info");
-    }
-  },
-
-  async connectInstagram() {
-    const bid = State.currentBusiness?.id;
-    if (!bid) {
-      Toast.show("Please select or create a business first.", "error");
-      return;
-    }
-
-    Toast.show("Initiating Meta OAuth flow...", "info");
-    const result = await API.get(`/api/auth/instagram/init?business_id=${bid}`);
-    
-    if (result && result.auth_url) {
-      // Redirect to Meta
-      window.location.href = result.auth_url;
-    } else {
-      Toast.show("Failed to initialize Instagram connection. Check server logs.", "error");
     }
   },
 
@@ -1288,16 +1269,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     animateValue("stat-leads", 0, State.leads.length || 47, 1000);
     animateValue("stat-attention", 0, State.leads.filter(l => l.needs_attention).length || 3, 1500);
   }, 500);
-
-  // Check for Instagram OAuth results in URL
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.has('instagram_success')) {
-    Toast.show("Instagram Account Connected Successfully! 🚀", "success", 5000);
-    // Clean up URL
-    window.history.replaceState({}, document.title, window.location.pathname);
-  } else if (urlParams.has('instagram_error')) {
-    const error = urlParams.get('instagram_error');
-    Toast.show(`Instagram Connection Failed: ${error}`, "error", 5000);
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
 });

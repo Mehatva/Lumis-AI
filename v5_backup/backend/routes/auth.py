@@ -4,8 +4,6 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from models import db
 from models.user import User
-from models.business import Business
-from services.instagram import InstagramService
 import uuid
 import smtplib
 from email.mime.text import MIMEText
@@ -71,8 +69,6 @@ def signup():
     if not email or not password:
         return jsonify({"error": "Email and password are required"}), 400
 
-    email = email.lower().strip()
-
     if User.query.filter_by(email=email).first():
         return jsonify({"error": "Email already registered"}), 400
 
@@ -105,8 +101,6 @@ def login():
 
     if not email or not password:
         return jsonify({"error": "Email and password are required"}), 400
-
-    email = email.lower().strip()
 
     user = User.query.filter_by(email=email).first()
     if not user or not user.check_password(password):
@@ -150,8 +144,6 @@ def google_login():
 
         if not email:
             return jsonify({"error": "Email not found in Google token"}), 400
-
-        email = email.lower().strip()
 
         # Check if user exists
         user = User.query.filter_by(email=email).first()
@@ -207,90 +199,3 @@ def instagram_login():
     # Placeholder for Instagram Sign-in 
     # Requires Meta App ID and Client Secret
     return jsonify({"error": "Instagram Sign-in is not yet configured. Please provide your Meta App Developer credentials."}), 501
-
-
-@auth_bp.get("/api/auth/instagram/init")
-@jwt_required()
-def instagram_init():
-    """
-    Returns the Meta authorization URL.
-    """
-    business_id = request.args.get("business_id")
-    if not business_id:
-        return jsonify({"error": "business_id is required"}), 400
-        
-    base_url = current_app.config.get("BASE_URL", "http://localhost:5001")
-    redirect_uri = f"{base_url}/api/auth/instagram/callback"
-    auth_url = InstagramService.get_auth_url(redirect_uri)
-    
-    # Store business_id in 'state' to retrieve it during callback
-    auth_url += f"&state={business_id}"
-    
-    return jsonify({"auth_url": auth_url}), 200
-
-
-@auth_bp.get("/api/auth/instagram/callback")
-def instagram_callback():
-    """
-    Handles the Meta OAuth redirect.
-    """
-    code = request.args.get("code")
-    business_id = request.args.get("state")
-    error = request.args.get("error")
-    
-    base_url = current_app.config.get("BASE_URL", "http://localhost:5001")
-
-    if error:
-        return redirect(f"{base_url}/dashboard?instagram_error={error}")
-        
-    if not code or not business_id:
-        return redirect(f"{base_url}/dashboard?instagram_error=missing_params")
-
-    redirect_uri = f"{base_url}/api/auth/instagram/callback"
-    
-    # 1. Exchange code for short-lived user token
-    token_data = InstagramService.exchange_code_for_token(code, redirect_uri)
-    if "error" in token_data:
-        print(f"[OAuth Callback] Token exchange failed: {token_data}")
-        return redirect(f"{base_url}/dashboard?instagram_error=token_exchange_failed")
-        
-    short_token = token_data.get("access_token")
-    
-    # 2. Get long-lived user token
-    long_token = InstagramService.get_long_lived_token(short_token)
-    if not long_token:
-        long_token = short_token
-
-    # 3. Get managed pages for this user
-    pages = InstagramService.get_managed_pages(long_token)
-    if not pages:
-        return redirect(f"{base_url}/dashboard?instagram_error=no_pages_found")
-        
-    # Identify the first page with a linked Instagram account
-    selected_page_id = None
-    ig_business_id = None
-    page_access_token = None
-    
-    for page in pages:
-        p_id = page.get("id")
-        p_token = page.get("access_token")
-        ig_id = InstagramService.get_ig_account_for_page(p_id, p_token)
-        if ig_id:
-            selected_page_id = p_id
-            ig_business_id = ig_id
-            page_access_token = p_token
-            break
-            
-    if not ig_business_id:
-        return redirect(f"{base_url}/dashboard?instagram_error=no_ig_account_linked")
-
-    # 4. Update the business profile
-    business = Business.query.get(business_id)
-    if not business:
-        return redirect(f"{base_url}/dashboard?instagram_error=business_not_found")
-        
-    business.instagram_page_id = ig_business_id
-    business.access_token = page_access_token
-    db.session.commit()
-    
-    return redirect(f"{base_url}/dashboard?instagram_success=true")

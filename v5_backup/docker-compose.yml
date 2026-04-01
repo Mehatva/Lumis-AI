@@ -9,7 +9,6 @@ services:
       - "5001:5001"
     volumes:
       - ./backend/instance:/app/backend/instance
-      - ./frontend:/app/frontend
     env_file:
       - ./backend/.env
     environment:
