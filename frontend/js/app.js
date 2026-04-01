@@ -977,6 +977,21 @@ const App = {
   
   initDemoChat() {
     initDemoChat();
+  },
+
+  togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const btn = event.currentTarget;
+    const icon = btn.querySelector('i');
+    
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.innerHTML = '<i data-lucide="eye-off" style="width: 18px; height: 18px;"></i>';
+    } else {
+      input.type = 'password';
+      btn.innerHTML = '<i data-lucide="eye" style="width: 18px; height: 18px;"></i>';
+    }
+    lucide.createIcons();
   }
 };
 

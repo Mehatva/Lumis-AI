@@ -108,9 +108,19 @@ def login():
 
     email = email.lower().strip()
 
+    print(f"[DEBUG LOGIN] Attempt: {email}")
+
     user = User.query.filter_by(email=email).first()
-    if not user or not user.check_password(password):
+    if not user:
+        print(f"[DEBUG LOGIN] User {email} not found in DB.")
         return jsonify({"error": "Invalid email or password"}), 401
+
+    if not user.check_password(password):
+        print(f"[DEBUG LOGIN] Password mismatch for {email}.")
+        print(f"[DEBUG LOGIN] User hash: {user.password_hash[:10]}...")
+        return jsonify({"error": "Invalid email or password"}), 401
+
+    print(f"[DEBUG LOGIN] Successful login: {email}")
 
     access_token = create_access_token(identity=str(user.id))
     return jsonify({
