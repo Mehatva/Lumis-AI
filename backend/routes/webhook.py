@@ -27,6 +27,9 @@ def handle_instagram():
     Looks up the business by INSTAGRAM_PAGE_ID, runs the chatbot, sends reply.
     """
     payload = request.get_json(silent=True) or {}
+    
+    # ─── DEBUG: Log raw payload to identify mobile-specific fields ───
+    current_app.logger.info(f"[Webhook Raw] Payload: {payload}")
 
     # Determine which page this webhook is for
     page_id = None
