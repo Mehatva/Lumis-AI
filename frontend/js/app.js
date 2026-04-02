@@ -53,19 +53,38 @@ const API = {
     try {
       const headers = { "Content-Type": "application/json" };
       const token = sessionStorage.getItem("chatiq_token");
-      if (token) headers["Authorization"] = `Bearer ${token}`;
+      if (token && token !== "null") {
+        headers["Authorization"] = `Bearer ${token}`;
+      } else {
+        console.warn(`[API] POST ${path} — No valid token found in sessionStorage.`);
+      }
 
       const r = await fetch(`${API_BASE}${path}`, {
         method: "POST",
-        headers,
-        body: JSON.stringify(body),
+        headers: headers,
+        body: JSON.stringify(body)
       });
-      if (r.status === 401 && path !== "/api/auth/login") { App.logout(false); return null; }
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      
+      if (r.status === 401) { 
+        console.error("[API] POST 401 Unauthorized — Session may be expired.");
+        App.logout(false); 
+        return null; 
+      }
+      
+      if (r.status === 422) {
+        const errData = await r.json().catch(() => ({}));
+        console.error("[API] POST 422 Unprocessable Entity:", errData);
+        return { error: errData.msg || "Authentication verification failed (422)" };
+      }
+
+      if (!r.ok) {
+        const errorData = await r.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${r.status}`);
+      }
       return r.json();
     } catch (e) {
-      console.warn(`[API] POST ${path} failed:`, e.message);
-      return null;
+      console.error(`[API] POST ${path} failed:`, e.message);
+      return { error: e.message };
     }
   },
   async patch(path, body = {}) {
@@ -106,16 +125,40 @@ const API = {
 
 /* ─── Business Selector ─── */
 async function loadBusinesses() {
+  const token = sessionStorage.getItem("chatiq_token");
+  if (!token) return;
+
   const businesses = await API.get("/api/businesses");
+  
+  const ctaContainer = document.getElementById("setup-cta-container");
+  const pricingSection = document.getElementById("pricing-section");
+  const overlay = document.getElementById("onboarding-overlay");
 
   if (!businesses || businesses.length === 0) {
-    console.log("No business found, redirecting to landing page for onboarding.");
-    window.location.href = "/"; // Redirect to landing page onboarding
+    console.log("No business found. Locking dashboard and showing CTA.");
+    document.body.classList.add("dashboard-locked");
+    if (ctaContainer) ctaContainer.classList.remove("hidden");
+    if (pricingSection) pricingSection.classList.add("hidden");
+    if (overlay) overlay.classList.add("hidden");
+    Toast.show("Welcome! Complete your profile to unlock Lumis AI. ✨", "info", 5000);
   } else {
     State.businesses = businesses;
-    State.currentBusiness = businesses[0];
-    document.body.classList.remove("dashboard-locked");
-    document.getElementById("onboarding-overlay").classList.add("hidden");
+    const b = businesses[0];
+    State.currentBusiness = b;
+    
+    // GATING: If plan is still 'trial', show pricing section and lock UI
+    if (!b.plan || b.plan === "trial") {
+      document.body.classList.add("dashboard-locked");
+      if (ctaContainer) ctaContainer.classList.add("hidden");
+      if (pricingSection) pricingSection.classList.remove("hidden");
+      if (overlay) overlay.classList.add("hidden");
+      Toast.show("Please select a plan to unlock your Dashboard.", "info");
+    } else {
+      document.body.classList.remove("dashboard-locked");
+      if (ctaContainer) ctaContainer.classList.add("hidden");
+      if (pricingSection) pricingSection.classList.add("hidden");
+      if (overlay) overlay.classList.add("hidden");
+    }
   }
 
   const select = document.getElementById("business-select");
@@ -194,24 +237,14 @@ const App = {
     }
   },
 
-  // ─── Onboarding (SaaS Flow) ───
-  showOnboarding() {
+  // ─── Onboarding (Hybrid Flow) ───
+  onboardStart() {
     const overlay = document.getElementById("onboarding-overlay");
-    if (overlay) overlay.classList.remove("hidden");
-    document.body.classList.add("dashboard-locked");
-    this.onboardNextStep(1);
+    if (overlay) {
+      overlay.classList.remove("hidden");
+      overlay.classList.add("open"); // Use open for modal animations if any
+    }
     if (window.lucide) lucide.createIcons();
-  },
-
-  onboardNextStep(step) {
-    [1, 2, 3].forEach(s => {
-      const el = document.getElementById(`onboard-step-${s}`);
-      if (el) el.classList.toggle("hidden", s !== step);
-    });
-  },
-
-  onboardPrevStep(current, prev) {
-    this.onboardNextStep(prev);
   },
 
   async onboardCreateBusiness(e) {
@@ -220,13 +253,24 @@ const App = {
     const niche = document.getElementById("onboard-niche").value;
     
     const result = await API.post("/api/businesses", { name, niche });
-    if (result) {
+    
+    if (result && !result.error) {
       State.currentBusiness = result;
       State.businesses.push(result);
-      this.onboardNextStep(2);
-      Toast.show("Business profile established. Proceeding to plans...", "success");
+      
+      // 1. Hide the popup
+      const overlay = document.getElementById("onboarding-overlay");
+      if (overlay) {
+        overlay.classList.remove("open");
+        overlay.classList.add("hidden");
+      }
+      
+      Toast.show("Brand identity saved! ✨ Redirecting to plans...", "success");
+      setTimeout(() => {
+        window.location.href = "/#pricing";
+      }, 1000);
     } else {
-      Toast.show("Failed to create business. Please try again.", "error");
+      Toast.show(result?.error || "Failed to create business.", "error");
     }
   },
 
@@ -642,30 +686,37 @@ const App = {
     Toast.show("Lead deleted", "info");
   },
 
-  exportLeads() {
+  async exportLeads() {
     const bid = State.currentBusiness?.id;
     if (!bid) return;
     
-    // If we're on localhost, use the backend export
-    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-      window.open(`${API_BASE}/api/leads/${bid}/export`, "_blank");
-      Toast.show("Exporting leads via backend... ⬇️", "info");
-      return;
-    }
+    Toast.show("Preparing your lead export... ⬇️", "info");
 
-    // Fallback for demo mode
-    if (!State.leads.length) { Toast.show("No leads to export", "info"); return; }
-    const headers = ["name", "phone", "platform", "captured_at", "is_converted"];
-    const rows = State.leads.map((l) =>
-      headers.map((h) => `"${(l[h] ?? "").toString().replace(/"/g, '""')}"`).join(",")
-    );
-    const csv = [headers.join(","), ...rows].join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = Object.assign(document.createElement("a"), { href: url, download: "leads.csv" });
-    a.click();
-    URL.revokeObjectURL(url);
-    Toast.show("Leads exported (local fallback) ⬇️", "success");
+    try {
+      const headers = { "Authorization": `Bearer ${sessionStorage.getItem("chatiq_token")}` };
+      const r = await fetch(`${API_BASE}/api/leads/${bid}/export`, { headers });
+      
+      if (r.status === 402) {
+        Toast.show("Subscription required to export leads.", "warning");
+        return;
+      }
+      
+      if (!r.ok) throw new Error("Export failed");
+
+      const blob = await r.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = `leads_business_${bid}_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      Toast.show("Export complete ✅", "success");
+    } catch (e) {
+      console.error("Export Error:", e);
+      Toast.show("Failed to export leads from server", "error");
+    }
   },
 
   // ─── SETTINGS ────────────────────────────────────────────────────────
@@ -838,39 +889,69 @@ const App = {
   },
 
   async sendTestMessage(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    
+    // Ensure we have a business context
     const bid = State.currentBusiness?.id;
+    if (!bid) {
+      Toast.show("Please select or create a business first.", "error");
+      return;
+    }
+
     const input = document.getElementById("test-message");
     const container = document.getElementById("chat-preview");
     const msg = input.value.trim();
-    if (!msg || !bid) return;
+    if (!msg) return;
 
-    // Add user message
-    container.innerHTML += `<div class="chat-bubble user">${escape(msg)}</div>`;
+    // Add user message to UI
+    const userDiv = document.createElement('div');
+    userDiv.className = "chat-bubble user";
+    userDiv.textContent = msg;
+    container.appendChild(userDiv);
+    
     input.value = "";
     container.scrollTop = container.scrollHeight;
 
-    // Show typing indicator while waiting
+    // Show typing indicator
     const loadingBubble = document.createElement('div');
     loadingBubble.className = "chat-bubble bot typing-indicator";
     loadingBubble.innerHTML = "<span class='dot'></span><span class='dot'></span><span class='dot'></span>";
     container.appendChild(loadingBubble);
     container.scrollTop = container.scrollHeight;
 
-    // Call API
-    const result = await API.post("/api/chat", {
-      business_id: bid,
-      message: msg,
-      session_id: "demo-web-user"
-    });
+    try {
+      // Use a persistent session ID for the duration of the sandbox session
+      if (!this._sandboxSessionId) this._sandboxSessionId = "sandbox_" + Math.random().toString(36).substring(7);
 
-    if (result && result.reply) {
+      const result = await API.post("/api/chat", {
+        business_id: bid,
+        message: msg,
+        session_id: this._sandboxSessionId
+      });
+
       loadingBubble.remove();
-      container.innerHTML += `<div class="chat-bubble bot">${formatText(escape(result.reply))}</div>`;
-    } else {
+
+      if (result && result.reply) {
+        const botDiv = document.createElement('div');
+        botDiv.className = "chat-bubble bot";
+        botDiv.innerHTML = formatText(escape(result.reply));
+        container.appendChild(botDiv);
+      } else {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = "chat-bubble bot error";
+        errorDiv.style.color = "#ef4444";
+        errorDiv.innerHTML = `<i>(Bot failed to reply. Check server logs.)</i>`;
+        container.appendChild(errorDiv);
+      }
+    } catch (err) {
       loadingBubble.remove();
-      container.innerHTML += `<div class="chat-bubble bot"><i>(Bot failed to reply. Is the Flask server running?)</i></div>`;
+      console.error("[Sandbox] Chat request failed:", err);
+      const errorDiv = document.createElement('div');
+      errorDiv.className = "chat-bubble bot error";
+      errorDiv.innerHTML = `<i>(Connection Error: ${err.message})</i>`;
+      container.appendChild(errorDiv);
     }
+    
     container.scrollTop = container.scrollHeight;
   },
 
@@ -979,10 +1060,11 @@ const App = {
     initDemoChat();
   },
 
-  togglePassword(inputId) {
+  togglePassword(e, inputId) {
+    if (e) e.preventDefault();
     const input = document.getElementById(inputId);
-    const btn = event.currentTarget;
-    const icon = btn.querySelector('i');
+    const btn = e ? e.currentTarget : null;
+    if (!input || !btn) return;
     
     if (input.type === 'password') {
       input.type = 'text';
@@ -991,7 +1073,7 @@ const App = {
       input.type = 'password';
       btn.innerHTML = '<i data-lucide="eye" style="width: 18px; height: 18px;"></i>';
     }
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
   }
 };
 

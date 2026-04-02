@@ -238,14 +238,28 @@ const App = {
         
         const primaryBtn = document.getElementById("hero-primary-btn");
         if (hasBusiness) {
-            primaryBtn.textContent = "Go to Dashboard";
+            primaryBtn.textContent = "Complete Your Profile";
             primaryBtn.onclick = () => window.location.href = "/dashboard";
         } else {
-            primaryBtn.textContent = "Complete Setup";
-            primaryBtn.onclick = () => this.openOnboarding();
+            primaryBtn.textContent = "Get Started Free";
+            primaryBtn.onclick = () => this.openAuthModal('signup');
         }
 
         lucide.createIcons();
+    },
+
+    togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            // Update icon to eye-off if needed, but let's keep it simple for now
+            // since we don't have a direct reference to the icon element easily here
+            // without additional DOM traversal. 
+        } else {
+            input.type = 'password';
+        }
     },
 
     logout() {
@@ -257,7 +271,7 @@ const App = {
         if (this._hasBusiness) {
             window.location.href = "/dashboard";
         } else {
-            this.openOnboarding();
+            this.openAuthModal('signup');
         }
     },
 
@@ -352,6 +366,86 @@ const App = {
 
     onboardComplete() {
         window.location.href = "/dashboard";
+    },
+
+    selectPlan(plan) {
+        const token = sessionStorage.getItem("chatiq_token");
+        if (!token) {
+            this.openAuthModal('signup');
+            return;
+        }
+        this.onboardSelectPlan(plan);
+    },
+
+    async onboardSelectPlan(plan) {
+        const token = sessionStorage.getItem("chatiq_token");
+        if (!token) return;
+
+        Toast.show(`Initializing ${plan} setup...`, "info");
+        
+        try {
+            // Fetch summary to get business_id
+            const summaryRes = await fetch(`${API_BASE}/api/dashboard/summary`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const summary = await summaryRes.json();
+            const bid = summary.businesses?.[0]?.id;
+
+            if (!bid) {
+                Toast.show("Please complete your profile in the dashboard first.", "warning");
+                setTimeout(() => window.location.href = "/dashboard", 2000);
+                return;
+            }
+
+            const r = await fetch(`${API_BASE}/api/billing/create-order`, {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ business_id: bid, plan_type: plan })
+            });
+            const result = await r.json();
+
+            if (!r.ok || result.error) throw new Error(result.error || "Order creation failed");
+
+            const options = {
+                "key": result.key,
+                "amount": result.amount,
+                "currency": result.currency,
+                "name": "Lumis AI",
+                "description": `${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan Subscription`,
+                "order_id": result.order_id,
+                "handler": async (response) => {
+                    const verRes = await fetch(`${API_BASE}/api/billing/verify-payment`, {
+                        method: "POST",
+                        headers: { 
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            business_id: bid,
+                            plan_type: plan
+                        })
+                    });
+                    const verResult = await verRes.json();
+                    if (verRes.ok) {
+                        Toast.show("Payment successful! Welcome to the premium tier. ✨", "success");
+                        setTimeout(() => window.location.href = "/dashboard", 2000);
+                    } else {
+                        Toast.show(verResult.error || "Payment verification failed.", "error");
+                    }
+                },
+                "theme": { "color": "#00d2ff" }
+            };
+            const rzp = new Razorpay(options);
+            rzp.open();
+        } catch (e) {
+            Toast.show(e.message, "error");
+        }
     }
 };
 

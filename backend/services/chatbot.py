@@ -190,7 +190,7 @@ class ChatbotService:
         self.ai = AIService(business)
 
     def get_or_create_conversation(self, session_id: str) -> Conversation:
-        conv = Conversation.query.filter_by(session_id=session_id).first()
+        conv = Conversation.query.filter_by(session_id=session_id, business_id=self.business.id).first()
         if not conv:
             conv = Conversation(
                 session_id=session_id,

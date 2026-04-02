@@ -30,4 +30,4 @@ RUN mkdir -p /app/backend/instance
 EXPOSE 5001
 
 # Command to run the application using Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5001", "--workers", "2", "--timeout", "120", "backend.app:create_app()"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5001", "--workers", "2", "--timeout", "120", "--access-logfile", "-", "--error-logfile", "-", "backend.app:create_app()"]

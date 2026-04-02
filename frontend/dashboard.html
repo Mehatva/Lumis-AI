@@ -18,7 +18,7 @@
     }
   </script>
 </head>
-<body class="luxury-dark">
+<body class="luxury-dark dashboard-locked">
 
 <!-- Background Design Elements -->
 <div class="bg-blobs">
@@ -31,14 +31,20 @@
      LOGIN OVERLAY
      A high-end entry point that sets the tone for the product.
 ═══════════════════════════════════════════════════════════════════════ -->
-<div class="login-overlay" id="login-overlay">
-  <div class="login-glass">
-    <div class="login-logo">Lumis AI</div>
-    <div style="color: var(--text-secondary);">Redirecting to secure login...</div>
-  </div>
-</div>
-
 <div class="app-container">
+  <!-- ─── SETUP JOURNEY CTA (Visible when Locked) ─── -->
+  <div id="setup-cta-container" class="hidden">
+    <div class="setup-cta-glass">
+      <div class="logo-icon animate-pulse" style="background: var(--accent); width: 64px; height: 64px; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; margin-bottom: 32px; box-shadow: 0 0 30px var(--accent-glow);">
+        <i data-lucide="zap" style="width: 32px; height: 32px;"></i>
+      </div>
+      <h1 style="font-family: var(--font-heading); font-size: 3rem; font-weight: 800; margin-bottom: 16px; color: #fff; letter-spacing: -0.04em;">Your AI Brand Awaits.</h1>
+      <p style="color: var(--muted); font-size: 1.2rem; margin-bottom: 40px; max-width: 500px;">Complete your brand profile to unlock luxury automation and 24/7 lead conversion.</p>
+      <button onclick="App.onboardStart()" class="shimmer-btn" style="padding: 24px 48px; font-size: 1.2rem; font-weight: 800; border-radius: 20px; background: var(--accent); color: #000; box-shadow: 0 20px 40px var(--accent-glow);">
+        Complete your profile <i data-lucide="sparkles" style="width: 20px; height: 20px; margin-left: 12px; vertical-align: middle;"></i>
+      </button>
+    </div>
+  </div>
   <!-- ═══════════════════════════════════════════════════════════════════════
        SIDEBAR NAVIGATION
   ═══════════════════════════════════════════════════════════════════════ -->
@@ -217,10 +223,14 @@
 
         <div id="demo-chat-input-wrapper" style="padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.2);">
           <div style="width: 32px; height: 32px; min-width: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; color: #fff;">U</div>
-          <div style="flex: 1; background: rgba(255,255,255,0.05); border-radius: 20px; padding: 8px 16px; min-height: 36px; display: flex; align-items: center;">
-            <input type="text" id="demo-chat-input" disabled placeholder="Message..." style="flex: 1; background: transparent; border: none; color: #fff; font-size: 0.85rem; outline: none;">
+          <div style="flex: 1; background: rgba(255,255,255,0.1); border-radius: 20px; padding: 8px 16px; min-height: 42px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.1);">
+            <input type="text" id="demo-chat-input" placeholder="Type a message to your AI..." 
+                   onkeyup="if(event.key==='Enter') App.sendSimulationMessage()"
+                   style="flex: 1; background: transparent; border: none; color: #fff; font-size: 0.9rem; outline: none;">
           </div>
-          <i data-lucide="send" style="width: 18px; height: 18px; color: var(--muted); transition: color 0.2s;" id="demo-chat-send-icon"></i>
+          <button onclick="App.sendSimulationMessage()" id="demo-chat-send-btn" style="background: transparent; border: none; cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center;">
+            <i data-lucide="send" style="width: 20px; height: 20px; color: var(--accent); transition: all 0.2s;" id="demo-chat-send-icon"></i>
+          </button>
         </div>
       </div>
 
@@ -466,11 +476,8 @@
     </p>
     <form id="import-form" onsubmit="App.runMagicImport(event)">
        <input type="url" id="import-url" class="login-input" style="text-align: left; font-size: 0.95rem; padding: 12px 20px;" placeholder="https://example.com" required />
-       <div id="import-error" style="color: #ef4444; font-size: 0.8rem; margin-top: -16px; margin-bottom: 16px; display: none;"></div>
-       <div id="import-actions" style="display: flex; justify-content: flex-end; gap: 16px;">
-          <button type="button" class="login-btn" style="background: transparent; color: #fff; width: auto;" onclick="App.closeImportModal()">Cancel</button>
-          <button type="submit" id="import-submit-btn" class="login-btn" style="width: auto; padding: 0 40px; background: var(--accent);">Start Extraction</button>
-       </div>
+       <div id="import-error" style="color: #ef4444; font-size: 0.8rem; margin-top: -16px; margin-bottom: 24px; display: none;"></div>
+       <button type="submit" class="login-btn" style="background: var(--accent); color: #000; font-weight: 800;">Start Import</button>
     </form>
     <div id="import-loader" style="display: none; flex-direction: column; align-items: center; gap: 20px; padding: 20px 0;">
        <div class="pulse-loader"></div>
@@ -483,88 +490,43 @@
 </div>
 
   </main>
-
-  <!-- ═══════════════════════════════════════════════════════════════════════
-       RIGHT PANEL — LIVE DEMO
-  ═══════════════════════════════════════════════════════════════════════ -->
 </div> <!-- Close .app-container -->
-  
+
 <!-- ═══════════════════════════════════════════════════════════════════════
-     ONBOARDING OVERLAY (SaaS Wizard)
+     ONBOARDING POPUP (Identity Only)
 ═══════════════════════════════════════════════════════════════════════ -->
-<div class="modal-overlay hidden" id="onboarding-overlay">
-  <div class="onboarding-card">
-    
-    <!-- Step 1: Business Identity -->
+<div class="modal-overlay hidden" id="onboarding-overlay" style="z-index: 20000 !important;">
+  <div class="onboarding-card" id="onboarding-card">
     <div id="onboard-step-1">
       <div style="text-align: center; margin-bottom: 40px;">
-        <div style="width: 72px; height: 72px; background: rgba(20, 184, 166, 0.1); border-radius: 22px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; color: var(--accent); border: 1px solid rgba(20, 184, 166, 0.2);">
+        <div class="plan-icon" style="margin: 0 auto 24px;">
           <i data-lucide="sparkles" style="width: 36px; height: 36px;"></i>
         </div>
-        <h2 style="font-family: var(--font-heading); font-size: 2.4rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px;">Welcome to <span style="background: linear-gradient(135deg, #fff, var(--accent)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Lumis AI</span></h2>
-        <p style="color: var(--text-secondary); font-size: 1.1rem; font-weight: 500;">Let's set up your first AI Business Assistant.</p>
+        <h2 class="plan-name">Welcome to Lumis AI</h2>
+        <p style="color: var(--muted); font-size: 1.1rem;">Let's set up your brand identity.</p>
       </div>
       <form onsubmit="App.onboardCreateBusiness(event)" style="display: flex; flex-direction: column; gap: 24px;">
-        <input type="text" id="onboard-name" class="login-input" placeholder="Business Name (e.g. FlexZone Fitness)" required style="text-align: left; font-size: 1.1rem; padding: 20px;" />
-        <select id="onboard-niche" class="select-input" style="width: 100%; height: 60px; font-size: 1rem; border-radius: 12px; background: var(--bg-input); color: #fff; padding: 0 20px; border: 1px solid var(--border);">
-          <option value="gym">Gym / Fitness</option>
-          <option value="salon">Salon / Spa</option>
-          <option value="cafe">Cafe / Dining</option>
-          <option value="ecommerce">E-commerce</option>
-          <option value="general">Corporate / Other</option>
-        </select>
-        <button type="submit" class="login-btn" style="padding: 20px; font-size: 1.1rem; font-weight: 800;">Continue to Plans</button>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Business Name</label>
+          <input type="text" id="onboard-name" class="login-input" placeholder="e.g. FlexGym Mumbai" required />
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Industry Niche</label>
+          <select id="onboard-niche" class="login-input select-input">
+            <option value="gym">Gym / Fitness</option>
+            <option value="salon">Salon / Spa</option>
+            <option value="cafe">Cafe / Dining</option>
+            <option value="ecommerce">E-commerce</option>
+            <option value="general">Corporate / Other</option>
+          </select>
+        </div>
+
+        <button type="submit" class="plan-btn featured" style="padding: 20px;">
+          Complete Setup <i data-lucide="arrow-right" style="width: 18px; height: 18px; margin-left: 8px; vertical-align: middle;"></i>
+        </button>
       </form>
     </div>
-
-    <!-- Step 2: Select Plan -->
-    <div id="onboard-step-2" class="hidden">
-      <div style="text-align: center; margin-bottom: 40px;">
-        <h2 style="font-family: var(--font-heading); font-size: 2rem; margin-bottom: 12px;">Choose Your Plan</h2>
-        <p style="color: var(--muted);">Select the level of automation your brand deserves.</p>
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-        <div class="price-card" style="padding: 30px; border: 1px solid var(--border);">
-          <div style="font-weight: 800; font-size: 1.2rem; margin-bottom: 8px;">Starter</div>
-          <div style="font-size: 1.8rem; font-weight: 900; margin-bottom: 20px;">₹999<span style="font-size: 0.9rem; color: var(--muted);">/mo</span></div>
-          <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: var(--muted); display: flex; flex-direction: column; gap: 10px;">
-            <li><i data-lucide="check" style="width:14px; height:14px; color:var(--accent);"></i> Unlimited FAQs</li>
-            <li><i data-lucide="check" style="width:14px; height:14px; color:var(--accent);"></i> Lead Capture</li>
-          </ul>
-          <button onclick="App.onboardSelectPlan('starter')" class="login-btn" style="margin-top: 24px; padding: 12px;">Select Starter</button>
-        </div>
-        <div class="price-card popular" style="padding: 30px; border: 1px solid var(--accent);">
-          <div style="color: var(--accent); font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-bottom: 8px;">MOST POPULAR</div>
-          <div style="font-weight: 800; font-size: 1.2rem; margin-bottom: 8px;">Growth</div>
-          <div style="font-size: 1.8rem; font-weight: 900; margin-bottom: 20px;">₹1,999<span style="font-size: 0.9rem; color: var(--muted);">/mo</span></div>
-          <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: var(--muted); display: flex; flex-direction: column; gap: 10px;">
-            <li><i data-lucide="check" style="width:14px; height:14px; color:var(--accent);"></i> Magic Import</li>
-            <li><i data-lucide="check" style="width:14px; height:14px; color:var(--accent);"></i> Detailed Analytics</li>
-          </ul>
-          <button onclick="App.onboardSelectPlan('growth')" class="login-btn" style="margin-top: 24px; padding: 12px; background: var(--accent);">Select Growth</button>
-        </div>
-      </div>
-      <div style="text-align: center;">
-        <button onclick="App.onboardPrevStep(2, 1)" style="background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 0.9rem;">← Back to details</button>
-      </div>
-    </div>
-
-    <!-- Step 3: Setup Magic Import -->
-    <div id="onboard-step-3" class="hidden">
-       <div style="text-align: center; margin-bottom: 40px;">
-        <div style="width: 64px; height: 64px; background: rgba(99, 102, 241, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; color: var(--accent);">
-          <i data-lucide="wand-2" style="width: 32px; height: 32px;"></i>
-        </div>
-        <h2 style="font-family: var(--font-heading); font-size: 2rem; margin-bottom: 12px;">Magic Setup</h2>
-        <p style="color: var(--muted);">Paste your website URL and we'll build your AI instantly.</p>
-      </div>
-      <form onsubmit="App.onboardRunMagic(event)" style="display: flex; flex-direction: column; gap: 24px;">
-        <input type="url" id="onboard-url" class="login-input" placeholder="https://yourbrand.com" required style="text-align: left; font-size: 1.1rem; padding: 20px;" />
-        <button type="submit" id="onboard-import-btn" class="login-btn" style="padding: 20px; font-size: 1.1rem; font-weight: 800;">Build My AI Assistant</button>
-        <button type="button" onclick="App.onboardComplete()" style="background: transparent; border: none; color: var(--muted); cursor: pointer; text-decoration: underline; font-size: 0.9rem;">Skip for now, I'll add FAQs manually</button>
-      </form>
-    </div>
-
   </div>
 </div>
 
@@ -572,7 +534,7 @@
 
 <script src="js/app.js"></script>
 <script>
-  // Initialize Lucide icons
+  // Initial icons
   lucide.createIcons();
 </script>
 </body>

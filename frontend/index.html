@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/landing.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="luxury-dark landing-page">
@@ -60,8 +61,7 @@
                 <button onclick="location.hash='#features'" class="login-btn" style="padding: 18px 48px; font-size: 1.1rem; border-radius: 99px; background: transparent; border: 1px solid var(--border-bright); color: #fff; box-shadow: none;">See Features</button>
             </div>
             <div class="hero-actions hidden" id="hero-actions-user">
-                <button id="hero-primary-btn" onclick="App.handleHeroAction()" class="login-btn" style="padding: 18px 48px; font-size: 1.1rem; border-radius: 99px;">Complete Setup</button>
-                <button onclick="location.href='/dashboard'" class="login-btn" style="padding: 18px 48px; font-size: 1.1rem; border-radius: 99px; background: transparent; border: 1px solid var(--border-bright); color: #fff; box-shadow: none;">Go to Dashboard</button>
+                <button id="hero-primary-btn" onclick="App.handleHeroAction()" class="login-btn" style="padding: 18px 48px; font-size: 1.1rem; border-radius: 99px;">Complete Your Profile</button>
             </div>
         </div>
     </div>
@@ -115,7 +115,7 @@
                     <li><i data-lucide="check"></i> Simple flows</li>
                     <li><i data-lucide="check"></i> Dashboard access</li>
                 </ul>
-                <button onclick="App.openAuthModal('signup')" class="login-btn">Choose Starter</button>
+                <button onclick="App.selectPlan('starter')" class="login-btn">Choose Starter</button>
             </div>
 
             <!-- Growth (Popular) -->
@@ -131,7 +131,7 @@
                     <li><i data-lucide="check"></i> Smart handoff system</li>
                     <li><i data-lucide="check"></i> Priority support</li>
                 </ul>
-                <button onclick="App.openAuthModal('signup')" class="login-btn">Choose Growth</button>
+                <button onclick="App.selectPlan('growth')" class="login-btn">Choose Growth</button>
             </div>
 
             <!-- Scale -->
@@ -146,7 +146,7 @@
                     <li><i data-lucide="check"></i> Priority escalation</li>
                     <li><i data-lucide="check"></i> Dedicated support</li>
                 </ul>
-                <button onclick="App.openAuthModal('signup')" class="login-btn">Choose Scale</button>
+                <button onclick="App.selectPlan('scale')" class="login-btn">Choose Scale</button>
             </div>
         </div>
     </div>
@@ -162,9 +162,9 @@
                     The definitive AI automation platform for luxury brands and premium businesses.
                 </p>
                 <div style="display: flex; gap: 16px;">
-                    <a href="#" class="social-link"><i data-lucide="instagram"></i></a>
-                    <a href="#" class="social-link"><i data-lucide="twitter"></i></a>
-                    <a href="#" class="social-link"><i data-lucide="linkedin"></i></a>
+                    <a href="#" class="social-link"><i data-lucide="Instagram"></i></a>
+                    <a href="#" class="social-link"><i data-lucide="Twitter"></i></a>
+                    <a href="#" class="social-link"><i data-lucide="Linkedin"></i></a>
                 </div>
             </div>
 
@@ -299,86 +299,7 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════════
-     ONBOARDING OVERLAY (Integrated Wizard)
-═══════════════════════════════════════════════════════════════════════ -->
-<div class="modal-overlay hidden" id="onboarding-overlay">
-  <div class="onboarding-card">
-    
-    <!-- Step 1: Business Identity -->
-    <div id="onboard-step-1">
-      <div style="text-align: center; margin-bottom: 40px;">
-        <div style="width: 72px; height: 72px; background: rgba(20, 184, 166, 0.1); border-radius: 22px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; color: var(--accent); border: 1px solid rgba(20, 184, 166, 0.2);">
-          <i data-lucide="sparkles" style="width: 36px; height: 36px;"></i>
-        </div>
-        <h2 style="font-family: var(--font-heading); font-size: 2.4rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px;">Welcome to <span style="background: linear-gradient(135deg, #fff, var(--accent)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Lumis AI</span></h2>
-        <p style="color: var(--text-secondary); font-size: 1.1rem; font-weight: 500;">Let's set up your first AI Business Assistant.</p>
-      </div>
-      <form onsubmit="App.onboardCreateBusiness(event)" style="display: flex; flex-direction: column; gap: 24px;">
-        <input type="text" id="onboard-name" class="login-input" placeholder="Business Name (e.g. FlexZone Fitness)" required style="text-align: left; font-size: 1.1rem; padding: 20px;" />
-        <select id="onboard-niche" class="select-input" style="width: 100%; height: 60px; font-size: 1rem; border-radius: 12px; background: var(--bg-input); color: #fff; padding: 0 20px; border: 1px solid var(--border);">
-          <option value="gym">Gym / Fitness</option>
-          <option value="salon">Salon / Spa</option>
-          <option value="cafe">Cafe / Dining</option>
-          <option value="ecommerce">E-commerce</option>
-          <option value="general">Corporate / Other</option>
-        </select>
-        <button type="submit" class="login-btn" style="padding: 20px; font-size: 1.1rem; font-weight: 800;">Continue to Plans</button>
-        <button type="button" onclick="App.closeOnboarding()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.9rem;">Maybe later</button>
-      </form>
-    </div>
-
-    <!-- Step 2: Select Plan -->
-    <div id="onboard-step-2" class="hidden">
-      <div style="text-align: center; margin-bottom: 40px;">
-        <h2 style="font-family: var(--font-heading); font-size: 2rem; margin-bottom: 12px;">Choose Your Plan</h2>
-        <p style="color: var(--muted);">Select the level of automation your brand deserves.</p>
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-        <div class="price-card" style="padding: 30px; border: 1px solid var(--border);">
-          <div style="font-weight: 800; font-size: 1.2rem; margin-bottom: 8px;">Starter</div>
-          <div style="font-size: 1.8rem; font-weight: 900; margin-bottom: 20px;">₹2,499<span style="font-size: 0.9rem; color: var(--muted);">/mo</span></div>
-          <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: var(--muted); display: flex; flex-direction: column; gap: 10px;">
-            <li><i data-lucide="check" style="width:14px; height:14px; color:var(--accent);"></i> Unlimited FAQs</li>
-            <li><i data-lucide="check" style="width:14px; height:14px; color:var(--accent);"></i> Lead Capture</li>
-          </ul>
-          <button onclick="App.onboardSelectPlan('starter')" class="login-btn" style="margin-top: 24px; padding: 12px;">Select Starter</button>
-        </div>
-        <div class="price-card popular" style="padding: 30px; border: 1px solid var(--accent);">
-          <div style="color: var(--accent); font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-bottom: 8px;">MOST POPULAR</div>
-          <div style="font-weight: 800; font-size: 1.2rem; margin-bottom: 8px;">Growth</div>
-          <div style="font-size: 1.8rem; font-weight: 900; margin-bottom: 20px;">₹5,999<span style="font-size: 0.9rem; color: var(--muted);">/mo</span></div>
-          <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: var(--muted); display: flex; flex-direction: column; gap: 10px;">
-            <li><i data-lucide="check" style="width:14px; height:14px; color:var(--accent);"></i> Magic Import</li>
-            <li><i data-lucide="check" style="width:14px; height:14px; color:var(--accent);"></i> Detailed Analytics</li>
-          </ul>
-          <button onclick="App.onboardSelectPlan('growth')" class="login-btn" style="margin-top: 24px; padding: 12px; background: var(--accent);">Select Growth</button>
-        </div>
-      </div>
-      <div style="text-align: center;">
-        <button onclick="App.onboardPrevStep(2, 1)" style="background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 0.9rem;">← Back to details</button>
-      </div>
-    </div>
-
-    <!-- Step 3: Setup Magic Import -->
-    <div id="onboard-step-3" class="hidden">
-       <div style="text-align: center; margin-bottom: 40px;">
-        <div style="width: 64px; height: 64px; background: rgba(20, 184, 166, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; color: var(--accent);">
-          <i data-lucide="wand-2" style="width: 32px; height: 32px;"></i>
-        </div>
-        <h2 style="font-family: var(--font-heading); font-size: 2rem; margin-bottom: 12px;">Magic Setup</h2>
-        <p style="color: var(--muted);">Paste your website URL and we'll build your AI instantly.</p>
-      </div>
-      <form onsubmit="App.onboardRunMagic(event)" style="display: flex; flex-direction: column; gap: 24px;">
-        <input type="url" id="onboard-url" class="login-input" placeholder="https://yourbrand.com" required style="text-align: left; font-size: 1.1rem; padding: 20px;" />
-        <button type="submit" id="onboard-import-btn" class="login-btn" style="padding: 20px; font-size: 1.1rem; font-weight: 800;">Build My AI Assistant</button>
-        <button type="button" onclick="App.onboardComplete()" style="background: transparent; border: none; color: var(--muted); cursor: pointer; text-decoration: underline; font-size: 0.9rem;">Skip for now, I'll add FAQs manually</button>
-      </form>
-    </div>
-
-  </div>
-</div>
-
+<!-- Toast Notification -->
 <div id="toast" style="position: fixed; bottom: 40px; right: 40px; background: #fff; color: #000; padding: 12px 24px; border-radius: 12px; font-weight: 600; opacity: 0; transform: translateY(100px); transition: all 0.4s; z-index: 20000;"></div>
 
 <script src="js/landing.js"></script>

@@ -7,7 +7,7 @@ class Conversation(db.Model):
     __tablename__ = "conversations"
 
     id = db.Column(db.Integer, primary_key=True)
-    session_id = db.Column(db.String(128), unique=True, nullable=False)  # sender IGSID
+    session_id = db.Column(db.String(128), index=True, nullable=False)  # sender IGSID
     business_id = db.Column(db.Integer, db.ForeignKey("businesses.id"), nullable=False)
     platform = db.Column(db.String(30), default="instagram")
     state = db.Column(db.String(50), default="idle")   # idle | capture_name | capture_phone | confirm_details | done
@@ -19,9 +19,13 @@ class Conversation(db.Model):
 
     def get_messages(self):
         try:
-            return json.loads(self.messages)
+            return json.loads(self.messages or "[]")
         except Exception:
             return []
+
+    def get_history(self):
+        """Used by ChatbotService for history."""
+        return self.get_messages()
 
     def add_message(self, role, text):
         msgs = self.get_messages()
