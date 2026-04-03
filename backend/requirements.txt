@@ -12,4 +12,8 @@ flask-jwt-extended==4.7.1
 google-auth==2.29.0
 groq==0.8.0
 razorpay
+psycopg2-binary
+flask-migrate
+sentry-sdk[flask]
+flask-limiter==3.7.0
 

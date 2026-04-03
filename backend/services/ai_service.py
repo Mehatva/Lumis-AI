@@ -58,16 +58,21 @@ class AIService:
             "Does one of these fit what you're looking for? 💪\""
         )
         
+        if b.knowledge_base:
+            prompt += (
+                "\n\n**YOUR INNATE KNOWLEDGE**:\n"
+                "You have been specially trained on this business. Use the following core profile "
+                "to understand the business context and history:\n"
+                f"{b.knowledge_base}\n"
+            )
+
         if faqs_text:
             prompt += (
-                "\n\nUse the following Business FAQs to provide the most accurate answers. "
-                "If the user's question is answered in the FAQs, use that information "
-                "to craft a personalized, friendly response. If not, follow general guidelines."
-                f"\n--- BUSINESS FAQs ---\n{faqs_text}\n"
+                "\n\n**ACTIVE QUICK QUESTIONS (FAQs)**:\n"
+                "Use these specific Q&As for immediate accuracy on frequently asked details:\n"
+                f"{faqs_text}\n"
             )
-        else:
-            prompt += "\n\nIf you don't have enough information, kindly ask them to contact the business directly. "
-
+        
         prompt += (
             f"\nBooking link: {b.booking_url or 'N/A'}. "
             f"Phone: {b.phone or 'N/A'}."
@@ -243,6 +248,11 @@ class AIService:
         """Fallback mock generator when API is down or quota exceeded."""
         import time
         time.sleep(1) # Brief pause for realism
+        
+        # [NEW] Innate Business Intelligence (Growth/Pro only)
+        kb_context = ""
+        if self.business.plan in ("growth", "pro", "scale") and self.business.knowledge_base:
+            kb_context = f"\nINNATE KNOWLEDGE (Internalized Brand Identity):\n{self.business.knowledge_base}\n"
         
         # Smart detection based on niche or name
         niche = (self.business.niche or "").lower()

@@ -1,21 +1,30 @@
 from flask import Blueprint, jsonify, current_app, request
+from flask_jwt_extended import jwt_required
 from models.business import Business
 from services.training_service import TrainingService
-from models import db
+from extensions import db, limiter
 from datetime import datetime
+from utils.auth_utils import business_owned
 
 training_bp = Blueprint("training", __name__)
 
 @training_bp.post("/api/business/<int:business_id>/train")
-def train_ai(business_id):
+@jwt_required()
+@business_owned
+@limiter.limit("5 per day")
+def train_ai(business_id, business=None):
     """
     Triggers the TrainingService to synthesize a business profile.
+    Available for Growth and Scale tiers.
     """
+    if business.plan not in ("growth", "pro", "scale"):
+        return jsonify({
+            "status": "upgrade_required",
+            "message": "Specialized AI Persona Synthesis is only available on our Growth and Scale plans. Upgrade now to give your bot a unique brand identity! 🚀"
+        }), 402
+
     try:
-        # 1. Fetch business
-        business = Business.query.get_or_404(business_id)
-        
-        # 2. Run Training (Uses Groq-Llama3 by default)
+        # 1. Run Training (Uses Groq-Llama3 by default)
         success = TrainingService.train_business(business_id)
         
         if success:

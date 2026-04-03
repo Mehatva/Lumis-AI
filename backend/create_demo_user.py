@@ -2,7 +2,7 @@ import os
 import sys
 from datetime import datetime
 
-# Add the current directory to sys.path to import app and models
+# Add current dir to path
 sys.path.append(os.getcwd())
 
 from app import create_app
@@ -18,7 +18,7 @@ def create_demo():
         email = "demo@lumisai.in"
         password = "demo_password_123"
         
-        # 1. Create User
+        # 1. Create/Update User
         user = User.query.filter_by(email=email).first()
         if not user:
             user = User(email=email, name="Demo User", is_verified=True)
@@ -30,9 +30,9 @@ def create_demo():
             user.is_verified = True
             user.set_password(password)
             db.session.commit()
-            print(f"User {email} already exists, updated password and verified status.")
+            print(f"User {email} restored.")
 
-        # 2. Create Business
+        # 2. Create/Update Business (Unlock Dashboard with 'growth' plan)
         business = Business.query.filter_by(user_id=user.id).first()
         if not business:
             business = Business(
@@ -41,17 +41,25 @@ def create_demo():
                 niche="gym",
                 phone="+91 99999 88888",
                 location="Juhu, Mumbai",
-                plan="growth" # UNLOCK DASHBOARD
+                plan="growth", # UNLOCKS DASHBOARD
+                access_token=os.getenv("INSTAGRAM_ACCESS_TOKEN", ""), # RESTORE TOKEN
+                instagram_page_id=os.getenv("INSTAGRAM_PAGE_ID", "17841435014143545"),
+                is_active=True # ACTIVATE FOR WEBHOOK
             )
             db.session.add(business)
             db.session.commit()
-            print(f"Business {business.name} created.")
+            print(f"Business {business.name} created and activated.")
         else:
             business.plan = "growth"
+            business.is_active = True # ENSURE ACTIVE
+            business.access_token = os.getenv("INSTAGRAM_ACCESS_TOKEN", "") # UPDATE TOKEN
+            business.instagram_page_id = os.getenv("INSTAGRAM_PAGE_ID", "17841435014143545")
             db.session.commit()
-            print(f"Business {business.name} already exists, updated plan to growth.")
+            print(f"Business '{business.name}' token and status updated.")
+        
+        print(f"Business '{business.name}' is active on the 'growth' plan.")
 
-        # 3. Add Mock Leads
+        # 3. Add Mock Leads (if empty)
         if Lead.query.filter_by(business_id=business.id).count() == 0:
             leads = [
                 Lead(business_id=business.id, name="Aarav Sharma", phone="+91 98765 43210", note="Interested in personal training.", needs_attention=True),
@@ -60,9 +68,8 @@ def create_demo():
             ]
             db.session.add_all(leads)
             db.session.commit()
-            print(f"Added {len(leads)} mock leads.")
 
-        # 4. Add Mock FAQs
+        # 4. Add Mock FAQs (if empty)
         if FAQ.query.filter_by(business_id=business.id).count() == 0:
             faqs = [
                 FAQ(business_id=business.id, question="What are your timings?", keywords='["timings", "open", "hours"]', response="We are open from 6:00 AM to 10:00 PM daily."),
@@ -70,9 +77,8 @@ def create_demo():
             ]
             db.session.add_all(faqs)
             db.session.commit()
-            print(f"Added {len(faqs)} mock FAQs.")
 
-        print("\nDemo account is ready!")
+        print("\n✅ Demo environment restored!")
         print(f"Email: {email}")
         print(f"Password: {password}")
 

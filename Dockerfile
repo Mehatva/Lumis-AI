@@ -10,10 +10,15 @@ ENV FLASK_ENV=production
 # Set work directory
 WORKDIR /app
 
-# Install ONLY the bare essentials to stay light
+# Install essential build dependencies and security certificates
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libffi-dev \
+    ca-certificates \
+    curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Update pip and set up certifi
+RUN pip install --upgrade pip certifi
 
 # Install Python dependencies
 COPY backend/requirements.txt .

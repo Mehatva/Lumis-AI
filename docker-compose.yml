@@ -1,19 +1,45 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: lumis_ai_db
+    restart: always
+    environment:
+      POSTGRES_USER: lumis_admin
+      POSTGRES_PASSWORD: lumis_password_123
+      POSTGRES_DB: lumis_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lumis_admin -d lumis_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   lumis-ai:
     build: .
     container_name: lumis_ai_app
     restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     ports:
       - "5001:5001"
     volumes:
       - ./backend:/app/backend
       - ./backend/instance:/app/instance
       - ./frontend:/app/frontend
+      - ./backups:/app/backups
     env_file:
       - ./backend/.env
     environment:
       - FLASK_ENV=production
       - MOCK_MODE=false
       - PYTHONPATH=/app/backend
+
+volumes:
+  postgres_data:

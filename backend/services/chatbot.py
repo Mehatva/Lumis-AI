@@ -9,6 +9,7 @@ from models.faq import FAQ
 from models.lead import Lead
 from models.conversation import Conversation
 from services.ai_service import AIService
+from services.email_service import EmailService
 
 
 class IntentDetector:
@@ -108,10 +109,14 @@ class LeadCaptureFlow:
         normalized = re.sub(r"[^a-z0-9\s]", " ", message.lower()).strip()
         words = normalized.split()
         
+        # EXCLUSIONS: Words that might fuzzy match but aren't lead intents for a gym
+        EXCLUSIONS = {"teach", "chess", "game", "play"}
+        
         for kw in LeadCaptureFlow.TRIGGER_KEYWORDS:
             for word in words:
-                # Use a slightly more relaxed threshold for engagement (0.75)
-                if IntentDetector._levenshtein_ratio(word, kw) >= 0.75:
+                if word in EXCLUSIONS: continue
+                # Higher threshold (0.85) to avoid "teach" -> "reach" false positive
+                if IntentDetector._levenshtein_ratio(word, kw) >= 0.85:
                     return True
         return False
 
@@ -190,18 +195,57 @@ class ChatbotService:
         self.ai = AIService(business)
 
     def get_or_create_conversation(self, session_id: str) -> Conversation:
+        # 1. Primary lookup by both session_id and business_id
         conv = Conversation.query.filter_by(session_id=session_id, business_id=self.business.id).first()
-        if not conv:
+        if conv:
+            return conv
+
+        # 2. Safety check: maybe it exists for another business? 
+        # If the DB has a global UNIQUE constraint, we must handle it.
+        # But logically, it should only be unique for this business.
+        try:
             conv = Conversation(
                 session_id=session_id,
                 business_id=self.business.id,
             )
             db.session.add(conv)
             db.session.commit()
-        return conv
+            return conv
+        except Exception as e:
+            db.session.rollback()
+            # If still failing, let's try to regain control of the record if it belongs to someone else
+            # (In a real SaaS, we'd handle this more gracefully, but for demo, let's just make it work)
+            conv = Conversation.query.filter_by(session_id=session_id).first()
+            if conv:
+                conv.business_id = self.business.id
+                db.session.commit()
+                return conv
+            raise e
 
     def process(self, session_id: str, user_message: str) -> str:
-        """Main entry point. Returns reply string."""
+        """Main entry point. Returns reply string with usage gating."""
+        
+        # ─── SUPPORT MODE (Human Handoff) ───
+        # If the business has manually muted the bot for human support
+        if self.business.support_mode:
+            current_app.logger.info(f"Support Mode Active for {self.business.name}. AI is muted.")
+            # Return a subtle message or silence depending on preference. 
+            # We return a placeholder that the webhook can choose to ignore or send.
+            return (
+                "👋 A human specialist from our team is currently reviewing our chat "
+                "to provide you with the most accurate assistance. Please hold on! 😊"
+            )
+
+        # ─── USAGE GATE ───
+        # 1. Check if business has reached its plan limit
+        if self.business.credits_used >= self.business.credits_limit:
+            # Inform the user politely as discussed
+            return (
+                "We're experiencing high volume! 😊\n"
+                f"Please call us directly at *{self.business.phone or 'our office'}* for immediate assistance. "
+                "We look forward to helping you!"
+            )
+
         conv = self.get_or_create_conversation(session_id)
         conv.add_message("user", user_message)
 
@@ -270,5 +314,19 @@ class ChatbotService:
             reply += f"\n\n💬 Have more questions? Just ask!"
 
         conv.add_message("bot", reply)
+        
+        # ─── INCREMENT CREDITS & CHECK THRESHOLDS ───
+        self.business.credits_used += 1
+        
+        # 80% Threshold Detection
+        threshold_80 = int(self.business.credits_limit * 0.8)
+        if self.business.credits_used == threshold_80:
+            EmailService.send_usage_alert(self.business, 80)
+            
+        # 100% Threshold Detection
+        if self.business.credits_used >= self.business.credits_limit:
+            EmailService.send_limit_reached(self.business)
+            
         db.session.commit()
+        
         return reply

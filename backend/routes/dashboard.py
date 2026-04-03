@@ -5,6 +5,8 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db
 from models.business import Business
+from models.user import User
+from utils.auth_utils import business_owned, faq_owned
 from models.faq import FAQ
 from models.lead import Lead
 from models.conversation import Conversation
@@ -45,20 +47,18 @@ def create_business():
 
 @dashboard_bp.get("/api/businesses/<int:business_id>")
 @jwt_required()
-def get_business(business_id):
-    user_id = get_jwt_identity()
-    business = Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
+@business_owned
+def get_business(business_id, business=None):
     return jsonify(business.to_dict())
 
 
 @dashboard_bp.patch("/api/businesses/<int:business_id>")
 @jwt_required()
-def update_business(business_id):
-    user_id = get_jwt_identity()
-    business = Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
+@business_owned
+def update_business(business_id, business=None):
     data = request.get_json() or {}
     allowed = ["name", "niche", "phone", "location", "location_url",
-               "booking_url", "instagram_page_id", "access_token", "welcome_message", "tone", "plan"]
+               "booking_url", "instagram_page_id", "access_token", "welcome_message", "tone", "plan", "support_mode"]
     for field in allowed:
         if field in data:
             setattr(business, field, data[field])
@@ -70,18 +70,16 @@ def update_business(business_id):
 
 @dashboard_bp.get("/api/businesses/<int:business_id>/faqs")
 @jwt_required()
-def list_faqs(business_id):
-    user_id = get_jwt_identity()
-    business = Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
+@business_owned
+def list_faqs(business_id, business=None):
     faqs = FAQ.query.filter_by(business_id=business_id).order_by(FAQ.priority.desc()).all()
     return jsonify([f.to_dict() for f in faqs])
 
 
 @dashboard_bp.post("/api/businesses/<int:business_id>/faqs")
 @jwt_required()
-def create_faq(business_id):
-    user_id = get_jwt_identity()
-    Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
+@business_owned
+def create_faq(business_id, business=None):
     data = request.get_json() or {}
     faq = FAQ(
         business_id=business_id,
@@ -99,11 +97,8 @@ def create_faq(business_id):
 
 @dashboard_bp.patch("/api/faqs/<int:faq_id>")
 @jwt_required()
-def update_faq(faq_id):
-    user_id = get_jwt_identity()
-    faq = FAQ.query.get_or_404(faq_id)
-    # Check if the business belongs to the user
-    Business.query.filter_by(id=faq.business_id, user_id=user_id).first_or_404()
+@faq_owned
+def update_faq(faq_id, faq=None, business=None):
     data = request.get_json() or {}
     if "question" in data:
         faq.question = data["question"]
@@ -123,11 +118,8 @@ def update_faq(faq_id):
 
 @dashboard_bp.delete("/api/faqs/<int:faq_id>")
 @jwt_required()
-def delete_faq(faq_id):
-    user_id = get_jwt_identity()
-    faq = FAQ.query.get_or_404(faq_id)
-    # Check if the business belongs to the user
-    Business.query.filter_by(id=faq.business_id, user_id=user_id).first_or_404()
+@faq_owned
+def delete_faq(faq_id, faq=None, business=None):
     db.session.delete(faq)
     db.session.commit()
     return jsonify({"deleted": faq_id})
@@ -137,9 +129,8 @@ def delete_faq(faq_id):
 
 @dashboard_bp.get("/api/businesses/<int:business_id>/analytics")
 @jwt_required()
-def get_analytics(business_id):
-    user_id = get_jwt_identity()
-    business = Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
+@business_owned
+def get_analytics(business_id, business=None):
     
     # HARD GATE: If no paid plan yet, restrict analytics
     if business.plan == "trial":
@@ -207,9 +198,8 @@ def chat_demo():
 
 @dashboard_bp.post("/api/businesses/<int:business_id>/auto-kb")
 @jwt_required()
-def auto_kb(business_id):
-    user_id = get_jwt_identity()
-    business = Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
+@business_owned
+def auto_kb(business_id, business=None):
     data = request.get_json() or {}
     url = data.get("url")
     print(f"DEBUG: Received Magic Import URL: {url}")

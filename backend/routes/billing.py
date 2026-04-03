@@ -4,9 +4,7 @@ import razorpay
 from models import db
 from models.business import Business
 import os
-import hmac
-import hashlib
-import json
+from utils.auth_utils import business_owned
 
 billing_bp = Blueprint("billing", __name__)
 
@@ -18,16 +16,15 @@ def get_razorpay_client():
 
 @billing_bp.post("/api/billing/create-order")
 @jwt_required()
-def create_order():
+@business_owned
+def create_order(business=None):
     """Create a Razorpay Order for the setup fee + first month."""
-    user_id = get_jwt_identity()
     data = request.get_json() or {}
     business_id = data.get("business_id")
     plan_type = data.get("plan_type") # starter, growth, scale
+    user_id = get_jwt_identity()
 
-    business = Business.query.filter_by(id=business_id, user_id=user_id).first()
-    if not business:
-        return jsonify({"error": "Business not found"}), 404
+    # The decorator 'business_owned' handles the existence and ownership check
 
     # Pricing Logic (Prices in Paise for Razorpay)
     # Starter: 1999 setup + 2499 mo = 4498
@@ -103,7 +100,21 @@ def razorpay_webhook():
                 business.plan = plan
                 business.is_active = True
                 business.razorpay_subscription_id = order_id # Store order_id as ref
+                
+                # RESET CREDITS & SET LIMITS (Phase 2 Fulfillment)
+                business.credits_used = 0
+                business.billing_cycle_start = datetime.utcnow()
+                
+                # Enforce discussed caps
+                plan_limits = {
+                    "starter": 500,
+                    "growth": 2500,
+                    "scale": 10000,
+                    "pro": 10000
+                }
+                business.credits_limit = plan_limits.get(plan, 500)
+                
                 db.session.commit()
-                print(f"[RAZORPAY] Payment successful for Business {business_id}, Plan: {plan}")
+                print(f"[RAZORPAY] Fulfillment Success for Business {business_id}: Reset credits to 0, Limit {business.credits_limit}")
 
     return jsonify({"status": "ok"}), 200

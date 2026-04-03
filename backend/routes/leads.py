@@ -4,16 +4,15 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db
 from models.lead import Lead
 from models.business import Business
+from utils.auth_utils import business_owned, lead_owned
 
 leads_bp = Blueprint("leads", __name__)
 
 
 @leads_bp.get("/api/leads/<int:business_id>")
 @jwt_required()
-def get_leads(business_id):
-    user_id = get_jwt_identity()
-    business = Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
-    
+@business_owned
+def get_leads(business_id, business=None):
     # HARD GATE: If no paid plan yet, restrict leads access
     if business.plan == "trial":
         return jsonify({
@@ -27,11 +26,8 @@ def get_leads(business_id):
 
 @leads_bp.patch("/api/leads/<int:lead_id>/convert")
 @jwt_required()
-def mark_converted(lead_id):
-    user_id = get_jwt_identity()
-    lead = Lead.query.get_or_404(lead_id)
-    # Check if the business belongs to the user
-    Business.query.filter_by(id=lead.business_id, user_id=user_id).first_or_404()
+@lead_owned
+def mark_converted(lead_id, lead=None, business=None):
     lead.is_converted = True
     db.session.commit()
     return jsonify(lead.to_dict())
@@ -39,11 +35,8 @@ def mark_converted(lead_id):
 
 @leads_bp.delete("/api/leads/<int:lead_id>")
 @jwt_required()
-def delete_lead(lead_id):
-    user_id = get_jwt_identity()
-    lead = Lead.query.get_or_404(lead_id)
-    # Check if the business belongs to the user
-    Business.query.filter_by(id=lead.business_id, user_id=user_id).first_or_404()
+@lead_owned
+def delete_lead(lead_id, lead=None, business=None):
     db.session.delete(lead)
     db.session.commit()
     return jsonify({"deleted": lead_id})
@@ -51,14 +44,12 @@ def delete_lead(lead_id):
 
 @leads_bp.get("/api/leads/<int:business_id>/export")
 @jwt_required()
-def export_leads(business_id):
+@business_owned
+def export_leads(business_id, business=None):
     import io
     import csv
     from flask import Response
 
-    user_id = get_jwt_identity()
-    Business.query.filter_by(id=business_id, user_id=user_id).first_or_404()
-    
     leads = Lead.query.filter_by(business_id=business_id).order_by(Lead.captured_at.desc()).all()
     
     output = io.StringIO()

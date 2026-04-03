@@ -1,13 +1,13 @@
-"""Routes — Instagram webhook endpoints."""
 from flask import Blueprint, request, jsonify, current_app
 from models.business import Business
 from services.instagram import InstagramService
 from services.chatbot import ChatbotService
+from extensions import limiter
 
 webhook_bp = Blueprint("webhook", __name__)
 
 
-@webhook_bp.get("/webhook/instagram")
+@webhook_bp.get("/api/webhook/instagram")
 def verify_instagram():
     """Meta calls this GET endpoint to verify the webhook subscription."""
     mode = request.args.get("hub.mode")
@@ -20,7 +20,8 @@ def verify_instagram():
     return "Verification failed", 403
 
 
-@webhook_bp.post("/webhook/instagram")
+@webhook_bp.post("/api/webhook/instagram")
+@limiter.limit("60 per minute")
 def handle_instagram():
     """
     Receives inbound Instagram DMs.
