@@ -6,9 +6,18 @@ load_dotenv()
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
     # Use absolute path to ensure all contexts use the same file
+    # Database
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-    SQLALCHEMY_DATABASE_URI = os.getenv("CHATBOT_DATABASE_URL", f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'chatbot.db')}")
+    raw_db_url = os.getenv("CHATBOT_DATABASE_URL", f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'chatbot.db')}")
+    # Handle SQLAlchemy 1.4+ requirement for 'postgresql://' instead of 'postgres://'
+    if raw_db_url and raw_db_url.startswith("postgres://"):
+        raw_db_url = raw_db_url.replace("postgres://", "postgresql://", 1)
+    
+    SQLALCHEMY_DATABASE_URI = raw_db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    # Sentry DSN
+    SENTRY_DSN = os.getenv("SENTRY_DSN", "")
     BASE_URL = os.getenv("BASE_URL", "http://localhost:5001")
 
     # OpenAI

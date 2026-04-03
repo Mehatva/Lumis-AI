@@ -4,25 +4,33 @@ Flask Application Factory
 from flask import Flask
 from flask_cors import CORS
 from config import get_config
-from models import db
-from models.business import Business
-from models.faq import FAQ
-from models.lead import Lead
-from models.conversation import Conversation
-from models.user import User
-from flask_jwt_extended import JWTManager
-from flask_bcrypt import Bcrypt
-
+from extensions import db, bcrypt, jwt, limiter
+from flask_migrate import Migrate
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 def create_app():
-    app = Flask(__name__, static_folder="../frontend", static_url_path="")
-    app.config.from_object(get_config())
+    config = get_config()
 
-    # CORS handled by Nginx proxy
+    # 1. Initialize Sentry (if DSN is provided)
+    if config.SENTRY_DSN:
+        sentry_sdk.init(
+            dsn=config.SENTRY_DSN,
+            integrations=[FlaskIntegration()],
+            traces_sample_rate=1.0,
+            profiles_sample_rate=1.0,
+        )
+
+    app = Flask(__name__, static_folder="../frontend", static_url_path="")
+    app.config.from_object(config)
+
+    # Initialize Extensions from Hub
     CORS(app)
     db.init_app(app)
-    JWTManager(app)
-    Bcrypt(app)
+    Migrate(app, db)
+    jwt.init_app(app)
+    bcrypt.init_app(app)
+    limiter.init_app(app)
 
     @app.route("/")
     def index():
@@ -38,12 +46,14 @@ def create_app():
     from routes.dashboard import dashboard_bp
     from routes.auth import auth_bp
     from routes.billing import billing_bp
+    from routes.training import training_bp
 
     app.register_blueprint(webhook_bp)
     app.register_blueprint(leads_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(billing_bp)
+    app.register_blueprint(training_bp)
 
     with app.app_context():
         try:

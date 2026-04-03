@@ -183,7 +183,6 @@ function updateSidebarMeta() {
 
   if (user) {
     document.getElementById("sidebar-business-name").textContent = user.name || user.email;
-    // Update initials
     const initials = (user.name || "Admin")
       .split(" ")
       .map((n) => n[0])
@@ -196,7 +195,30 @@ function updateSidebarMeta() {
 
   if (b) {
     document.getElementById("plan-badge").textContent =
-      (b.plan || "trial").charAt(0).toUpperCase() + (b.plan || "trial").slice(1) + " Plan";
+      (b.plan || "trial").toUpperCase() + " PLAN";
+    
+    // ─── Update Status Hub ───
+    const kbDot = document.getElementById("status-kb");
+    const metaDot = document.getElementById("status-meta");
+    const supportContainer = document.getElementById("status-support-container");
+
+    if (kbDot) {
+      kbDot.style.background = b.is_trained ? "var(--accent-emerald)" : "#3f3f46";
+      kbDot.style.boxShadow = b.is_trained ? "0 0 10px var(--accent-emerald)" : "none";
+    }
+    
+    if (metaDot) {
+      metaDot.style.background = b.is_meta_connected ? "var(--accent-emerald)" : "#3f3f46";
+      metaDot.style.boxShadow = b.is_meta_connected ? "0 0 10px var(--accent-emerald)" : "none";
+    }
+
+    if (supportContainer) {
+      if (b.support_mode) {
+        supportContainer.classList.remove("hidden");
+      } else {
+        supportContainer.classList.add("hidden");
+      }
+    }
   }
 }
 
@@ -433,6 +455,122 @@ const App = {
     const attEl = document.getElementById("stat-attention");
     if (attEl && (analytics.needs_attention_count || 0) > 0) {
       attEl.parentElement.classList.add("pulse-red-border");
+    }
+
+    // Refresh training status
+    this._updateTrainingStatus(analytics);
+    this._updateUsageStats(analytics);
+  },
+
+  async _updateUsageStats(analytics) {
+    const b = State.currentBusiness;
+    if (!b) return;
+
+    // Update Plan Badge
+    const badge = document.getElementById("sidebar-plan-badge");
+    if (badge) {
+      badge.textContent = `${b.plan.toUpperCase()} PLAN`;
+      badge.style.color = b.plan === "trial" ? "var(--muted)" : "var(--accent)";
+    }
+
+    // Update Usage Metrics
+    const used = b.credits_used || 0;
+    const limit = b.credits_limit || 50;
+    const pct = Math.min(Math.round((used / limit) * 100), 100);
+
+    const bar = document.getElementById("usage-bar");
+    const pctText = document.getElementById("usage-pct");
+    const countText = document.getElementById("usage-count");
+    const limitText = document.getElementById("usage-limit");
+
+    if (bar) bar.style.width = `${pct}%`;
+    if (pctText) pctText.textContent = `${pct}%`;
+    if (countText) countText.textContent = used.toLocaleString();
+    if (limitText) limitText.textContent = `/ ${limit.toLocaleString()} limit`;
+
+    // 80% Warning Color
+    if (pct >= 80 && bar) {
+      bar.style.background = "var(--accent-rose)";
+      if (pctText) pctText.style.color = "var(--accent-rose)";
+    }
+  },
+
+  async _updateTrainingStatus(analytics) {
+    const statusEl = document.getElementById("ai-status-text");
+    const lastTrainedEl = document.getElementById("ai-last-trained");
+    const b = State.currentBusiness;
+    if (!statusEl || !b) return;
+
+    if (b.knowledge_base) {
+      statusEl.textContent = "AI Specialized";
+      statusEl.style.color = "var(--accent-emerald)";
+      if (lastTrainedEl && b.last_trained_at) {
+        lastTrainedEl.textContent = `Last trained: ${formatDate(b.last_trained_at)}`;
+      }
+    } else {
+      statusEl.textContent = "Generic Mode (Needs Training)";
+      statusEl.style.color = "var(--accent-rose)";
+    }
+  },
+
+  async trainAI() {
+    const bid = State.currentBusiness?.id;
+    if (!bid) return;
+
+    const btn = document.getElementById("train-ai-btn");
+    const container = document.getElementById("training-progress-container");
+    const bar = document.getElementById("training-progress-bar");
+    const statusText = document.getElementById("training-progress-text");
+
+    if (!btn || !container) return;
+
+    // UI Transformation
+    btn.disabled = true;
+    container.classList.remove("hidden");
+    
+    const steps = [
+      "Analyzing Brand Identity...",
+      "Injecting FAQ Knowledge...",
+      "Synthesizing Expert Persona...",
+      "Optimizing Response Patterns...",
+      "Knowledge Base Finalized! ✅"
+    ];
+
+    let currentStep = 0;
+    const interval = setInterval(() => {
+      if (currentStep < steps.length - 1) {
+        statusText.textContent = steps[currentStep];
+        bar.style.width = `${(currentStep + 1) * 20}%`;
+        currentStep++;
+      }
+    }, 1200);
+
+    try {
+      const result = await API.post(`/api/business/${bid}/train`);
+      
+      clearInterval(interval);
+      bar.style.width = "100%";
+      statusText.textContent = "Training Complete! ✨";
+      
+      if (result && result.status === "success") {
+        Toast.show("Your AI is now specialized! 🚀", "success");
+        if (State.currentBusiness) {
+          State.currentBusiness.knowledge_base = result.knowledge_summary;
+          State.currentBusiness.last_trained_at = result.last_trained_at;
+        }
+        setTimeout(() => {
+          container.classList.add("hidden");
+          btn.disabled = false;
+          this._loadDashboard(bid);
+        }, 2000);
+      } else {
+        throw new Error(result?.message || "Training failed");
+      }
+    } catch (e) {
+      clearInterval(interval);
+      container.classList.add("hidden");
+      btn.disabled = false;
+      Toast.show(e.message, "error");
     }
   },
 
@@ -730,14 +868,52 @@ const App = {
     const welcomeEl = document.getElementById("set-welcome");
     if(welcomeEl) welcomeEl.value = b.welcome_message || "";
     
+    // Support Mode Toggle Sync
+    this._updateSupportModeUI(b.support_mode);
+    
     const igPageIdEl = document.getElementById("set-ig-page-id");
     if(igPageIdEl) igPageIdEl.value = b.instagram_page_id || "";
     
     const igTokenEl = document.getElementById("set-ig-token");
     if(igTokenEl) igTokenEl.value = b.access_token || "";
+  },
 
-    const pb = document.getElementById("plan-badge");
-    if(pb) pb.textContent = (b.plan || "trial").charAt(0).toUpperCase() + (b.plan || "trial").slice(1) + " Plan";
+  async toggleSupportMode() {
+    const b = State.currentBusiness;
+    if (!b) return;
+
+    const newState = !b.support_mode;
+    
+    // Optimistic UI Update
+    this._updateSupportModeUI(newState);
+    
+    const result = await API.patch(`/api/businesses/${b.id}`, { support_mode: newState });
+    if (result) {
+      b.support_mode = newState;
+      updateSidebarMeta(); // Sync sidebar indicator
+      Toast.show(newState ? "AI Muted. Support Mode Active! 🎧" : "AI Restored! Bot is now back online. 🤖", "info");
+    } else {
+      this._updateSupportModeUI(b.support_mode); // Rollback
+      Toast.show("Failed to update Support Mode", "error");
+    }
+  },
+
+  _updateSupportModeUI(isActive) {
+    const toggle = document.getElementById("support-mode-toggle");
+    const knob = document.getElementById("support-mode-knob");
+    if (!toggle || !knob) return;
+
+    if (isActive) {
+      toggle.style.background = "var(--accent-rose)";
+      toggle.style.borderColor = "rgba(244, 63, 94, 0.4)";
+      knob.style.left = "24px";
+      knob.style.background = "#fff";
+    } else {
+      toggle.style.background = "rgba(255,255,255,0.05)";
+      toggle.style.borderColor = "rgba(255,255,255,0.1)";
+      knob.style.left = "3px";
+      knob.style.background = "var(--muted)";
+    }
   },
 
   async saveSettings(e) {

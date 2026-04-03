@@ -22,6 +22,17 @@ class Business(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True) # Temporarily nullable for existing data
     razorpay_customer_id = db.Column(db.String(120), nullable=True)
     razorpay_subscription_id = db.Column(db.String(120), nullable=True)
+    last_trained_at = db.Column(db.DateTime)
+    knowledge_base = db.Column(db.Text)                       # Compressed "Business Brain" profile
+    
+    # Billing & Usage tracking
+    credits_used = db.Column(db.Integer, default=0)
+    credits_limit = db.Column(db.Integer, default=50)         # Default trial limit: 50 messages
+    billing_cycle_start = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # AI Control
+    support_mode = db.Column(db.Boolean, default=False)       # True = Bot is muted for human support
+    
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     faqs = db.relationship("FAQ", backref="business", lazy=True, cascade="all, delete-orphan")
@@ -44,5 +55,12 @@ class Business(db.Model):
             "is_active": self.is_active,
             "razorpay_customer_id": self.razorpay_customer_id,
             "razorpay_subscription_id": self.razorpay_subscription_id,
+            "last_trained_at": self.last_trained_at.isoformat() if self.last_trained_at else None,
+            "knowledge_base": self.knowledge_base,
+            "credits_used": self.credits_used,
+            "credits_limit": self.credits_limit,
+            "support_mode": self.support_mode,
+            "is_trained": bool(self.knowledge_base),
+            "is_meta_connected": bool(self.access_token and self.instagram_page_id),
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

@@ -88,13 +88,45 @@
       </a>
     </nav>
 
+    <!-- ─── BOT STATUS HUB (NEW) ─── -->
+    <div class="status-hub" style="margin: 24px 16px; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-size: 0.65rem; color: var(--muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">System Health</div>
+      
+      <!-- Training Status -->
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #fff;">
+          <i data-lucide="brain" style="width: 14px; height: 14px; color: var(--muted);"></i>
+          <span>Knowledge</span>
+        </div>
+        <div id="status-kb" class="status-indicator" style="width: 8px; height: 8px; border-radius: 50%; background: #3f3f46;"></div>
+      </div>
+
+      <!-- Meta Status -->
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #fff;">
+          <i data-lucide="instagram" style="width: 14px; height: 14px; color: var(--muted);"></i>
+          <span>Meta API</span>
+        </div>
+        <div id="status-meta" class="status-indicator" style="width: 8px; height: 8px; border-radius: 50%; background: #3f3f46;"></div>
+      </div>
+
+      <!-- Support Mode -->
+      <div id="status-support-container" class="hidden" style="display: flex; align-items: center; justify-content: space-between; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--accent-rose);">
+          <i data-lucide="user-cog" style="width: 14px; height: 14px;"></i>
+          <span>Support Mode</span>
+        </div>
+        <div class="status-dot-pulsing" style="background: var(--accent-rose); width: 6px; height: 6px;"></div>
+      </div>
+    </div>
+
     <!-- User Profile Section -->
     <div class="sidebar-footer" style="margin-top: auto; padding: 24px 16px; padding-bottom: 40px; border-top: 1px solid var(--border);">
       <div style="display: flex; align-items: center; gap: 12px; padding: 0;">
         <div style="width: 38px; height: 38px; background: linear-gradient(135deg, var(--accent), var(--accent-emerald)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-size: 0.85rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3); margin-left: -4px;">M</div>
         <div style="flex: 1; min-width: 0;">
-          <div style="font-size: 0.85rem; font-weight: 600; color: var(--secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="sidebar-business-name">Admin Admin</div>
-          <div style="font-size: 0.7rem; color: var(--muted); font-weight: 600;" id="plan-badge">PRO PLAN</div>
+          <div style="font-size: 0.85rem; font-weight: 600; color: var(--secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="sidebar-business-name">Business Name</div>
+          <div style="font-size: 0.7rem; color: var(--muted); font-weight: 800; text-transform: uppercase;" id="sidebar-plan-badge">Trial</div>
         </div>
       </div>
       <a href="javascript:void(0)" onclick="App.logout()" style="margin-top: 16px; width: 100%; background: transparent; border: 1px solid rgba(255,255,255,0.06); color: var(--muted); padding: 8px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none;">
@@ -181,19 +213,25 @@
 
       <!-- Row 4: AI Sandbox Tools -->
       <div class="grid-split-66-33" style="gap: 24px;">
-        <div class="bento-card" style="padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);">
-          <h3 style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; margin-bottom: 24px;">The Conversion Engine</h3>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px 32px; color: var(--muted); font-size: 0.95rem; font-weight: 500; margin-bottom: 32px;">
-            <span style="display: flex; align-items: center; gap: 8px;"><i data-lucide="check-circle" style="color: var(--accent-emerald); width: 18px; height: 18px;"></i> Customer Intent Analysis</span>
-            <span style="display: flex; align-items: center; gap: 8px;"><i data-lucide="check-circle" style="color: var(--accent-emerald); width: 18px; height: 18px;"></i> Multi-Step Qualification</span>
-            <span style="display: flex; align-items: center; gap: 8px;"><i data-lucide="check-circle" style="color: var(--accent-emerald); width: 18px; height: 18px;"></i> Brand Voice Compliance</span>
-            <span style="display: flex; align-items: center; gap: 8px;"><i data-lucide="check-circle" style="color: var(--accent-emerald); width: 18px; height: 18px;"></i> Auto-Lead Injection</span>
+        <div class="bento-card" style="padding: 40px; display: flex; flex-direction: column; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); position: relative; overflow: hidden;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h3 style="font-family: var(--font-heading); font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 12px;">
+              <i data-lucide="brain-circuit" style="color: var(--accent);"></i> AI Knowledge Center
+            </h3>
+            <div id="ai-status-text" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">AWAITING TRAINING</div>
           </div>
           
-          <button onclick="App.optimizeAI()" class="shimmer-btn" style="width: 100%; max-width: 280px; background: rgba(10, 10, 10, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); padding: 24px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 12px; cursor: pointer; transition: all 0.25s;" onmouseover="this.style.background='rgba(99,102,241,0.12)'; this.style.borderColor='var(--accent)';" onmouseout="this.style.background='rgba(10,10,10,0.4)'; this.style.borderColor='rgba(255,255,255,0.1)';">
-            <i data-lucide="brain-circuit" style="width: 28px; height: 28px; color: rgba(255, 255, 255, 0.9);"></i>
-            <span style="color: rgba(255, 255, 255, 0.9); font-size: 1rem; font-weight: 600;">Optimize AI</span>
+          <p id="ai-last-trained" style="color: var(--muted); font-size: 0.85rem; margin-bottom: 32px;">Initialize your AI's innate knowledge profile to unlock expert-level responses.</p>
+          
+          <!-- Training Progress Bar (Hidden by default) -->
+          <div id="training-progress-container" class="hidden" style="margin-bottom: 24px; background: rgba(255,255,255,0.05); height: 8px; border-radius: 4px; overflow: hidden;">
+            <div id="training-progress-bar" style="width: 0%; height: 100%; background: var(--accent); transition: width 0.3s ease-out;"></div>
+          </div>
+          <p id="training-progress-text" class="hidden" style="font-size: 0.75rem; color: var(--accent); font-weight: 600; margin-bottom: 24px; text-align: center; width: 100%;"></p>
+          
+          <button id="train-ai-btn" onclick="App.trainAI()" class="shimmer-btn" style="width: 100%; background: var(--accent); color: #000; padding: 18px; border-radius: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer; border: none; box-shadow: 0 10px 25px var(--accent-glow);">
+            <i data-lucide="sparkles" style="width: 18px; height: 18px;"></i>
+            <span>Train Your AI Now</span>
           </button>
         </div>
 
@@ -240,38 +278,47 @@
   <!-- ─── PAGE: KNOWLEDGE BASE (FAQs) ─── -->
   <section class="page" id="page-faqs">
     <div style="display: flex; flex-direction: column; gap: 40px; margin-bottom: 56px;">
-      <div style="display: flex; justify-content: flex-end; align-items: flex-start;">
-        <div style="display: flex; gap: 16px; align-items: center; padding-top: 12px;">
-           <button class="login-btn" style="width: auto; padding: 0 28px; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.3); color: var(--accent); font-weight: 600;" onclick="App.openImportModal()">✨ Magic Import</button>
-           <button class="login-btn" style="width: auto; padding: 0 32px; background: var(--accent); font-weight: 700;" onclick="App.openFaqModal()">+ Create FAQ</button>
+      
+      <!-- Top Action Bar -->
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 class="page-title" style="margin-bottom: 0; font-size: 2.2rem;">FAQ Manager</h2>
+        <div style="display: flex; gap: 16px; align-items: center;">
+           <button class="login-btn secondary-btn" style="width: auto; padding: 0 28px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: #fff;" onclick="App.openImportModal()">✨ Magic Import</button>
+           <button class="login-btn" style="width: auto; padding: 0 32px; background: var(--accent); font-weight: 700; color: #000;" onclick="App.openFaqModal()">+ Create FAQ</button>
         </div>
       </div>
 
       <!-- Search & Overview Stats -->
-      <div style="display: grid; grid-template-columns: 1fr 320px; gap: 32px; align-items: center;">
-        <div style="display: flex; gap: 16px; background: rgba(255,255,255,0.02); padding: 14px 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); transition: all 0.3s ease;">
+      <div class="dashboard-bento" style="grid-template-columns: 1fr 340px; gap: 24px; align-items: stretch;">
+        
+        <!-- Search Bar -->
+        <div class="bento-card" style="padding: 24px; display: flex; align-items: center; gap: 16px;">
+          <div id="plan-badge" class="badge" style="background: var(--accent); color: #000; font-weight: 800; font-size: 0.7rem; padding: 6px 12px; border-radius: 6px; text-transform: uppercase; flex-shrink: 0;">TRIAL</div>
           <div style="flex: 1; position: relative; display: flex; align-items: center;">
-            <i data-lucide="search" style="position: absolute; left: 0; width: 22px; height: 22px; color: var(--muted);"></i>
-            <input type="text" placeholder="Search knowledge base by question, keyword, or response..." 
+            <i data-lucide="search" style="position: absolute; left: 0; width: 20px; height: 20px; color: var(--muted);"></i>
+            <input type="text" placeholder="Search knowledge base..." 
                    oninput="App.filterFaqs(this.value)"
-                   style="width: 100%; background: transparent; border: none; padding: 8px 8px 8px 40px; color: #fff; font-size: 1rem; outline: none;" />
+                   style="width: 100%; background: transparent; border: none; padding: 8px 8px 8px 36px; color: #fff; font-size: 1rem; outline: none;" />
           </div>
         </div>
-        <div class="faq-priority-stat" style="display: flex; align-items: center; justify-content: space-around; background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1); border-radius: 16px; height: 72px;">
-           <div style="text-align: center; border-right: 1px solid rgba(255,255,255,0.05); padding: 0 24px;">
-              <div style="font-size: 0.65rem; color: var(--muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.1em; margin-bottom: 4px;">Total</div>
-              <div style="font-size: 1.25rem; font-weight: 800; color: #fff;" id="kb-total">5</div>
+
+        <!-- Quick Stats -->
+        <div class="bento-card" style="padding: 0; display: flex; align-items: center; justify-content: space-around;">
+           <div style="text-align: center; border-right: 1px solid var(--border); flex: 1; padding: 16px;">
+              <div style="font-size: 0.6rem; color: var(--muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.1em; margin-bottom: 4px;">Total</div>
+              <div style="font-size: 1.4rem; font-weight: 800; color: #fff;" id="kb-total">0</div>
            </div>
-           <div style="text-align: center; padding: 0 24px;">
-              <div style="font-size: 0.65rem; color: var(--muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.1em; margin-bottom: 4px;">Active</div>
-              <div style="font-size: 1.25rem; font-weight: 800; color: var(--accent-emerald);">100%</div>
+           <div style="text-align: center; flex: 1; padding: 16px;">
+              <div style="font-size: 0.6rem; color: var(--muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.1em; margin-bottom: 4px;">Active</div>
+              <div style="font-size: 1.4rem; font-weight: 800; color: var(--accent-emerald);">100%</div>
            </div>
         </div>
       </div>
-    </div>
 
-    <div class="dashboard-bento" id="faqs-grid" style="grid-template-columns: repeat(2, 1fr); gap: 32px;">
-       <!-- Dynamic content here -->
+      <!-- FAQ Cards Grid -->
+      <div class="dashboard-bento" id="faqs-grid" style="grid-template-columns: repeat(2, 1fr); gap: 24px;">
+         <!-- Dynamic content here -->
+      </div>
     </div>
   </section>
 
@@ -317,6 +364,20 @@
                  <option value="general">Corporate / Other</option>
               </select>
               <textarea id="set-welcome" class="login-input" style="text-align: left; height: 120px;" placeholder="Welcome Signature"></textarea>
+              
+              <div class="luxury-btn" style="padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="App.toggleSupportMode()">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <i data-lucide="user-cog" style="color: var(--accent-rose);"></i>
+                  <div style="text-align: left;">
+                    <span style="font-weight: 700; color: #fff;">Human Support Mode</span>
+                    <p style="font-size: 0.75rem; color: var(--muted); margin-top: 2px;">Mutes AI to let humans handle chats.</p>
+                  </div>
+                </div>
+                <div id="support-mode-toggle" class="toggle-track" style="width: 44px; height: 22px; background: rgba(255,255,255,0.05); border-radius: 11px; border: 1px solid rgba(255,255,255,0.1); position: relative; transition: all 0.3s;">
+                  <div id="support-mode-knob" style="width: 16px; height: 16px; background: var(--muted); border-radius: 50%; position: absolute; left: 3px; top: 2px; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);"></div>
+                </div>
+              </div>
+
               <button type="submit" class="login-btn">Update Organization</button>
            </form>
         </div>
@@ -392,6 +453,27 @@
               <p style="color: var(--muted); font-size: 0.95rem;">Follow these 3 steps to unlock AI automation for your Instagram.</p>
            </div>
         </div>
+
+        <!-- Row 1: Key Performance Metrics -->
+      <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 24px;">
+        <!-- AI Usage Progress -->
+        <div class="metrics-card glass-glow" style="display: flex; flex-direction: column; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <p style="color: var(--muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">AI Message Usage</p>
+            <span id="usage-pct" style="font-size: 0.8rem; font-weight: 800; color: var(--accent);">0%</span>
+          </div>
+          <div style="background: rgba(255, 255, 255, 0.05); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 12px;">
+            <div id="usage-bar" style="width: 0%; height: 100%; background: var(--accent); transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <p id="usage-count" style="font-size: 1.1rem; font-weight: 800; color: #fff;">0</p>
+            <p id="usage-limit" style="font-size: 0.75rem; color: var(--muted);">/ 50 limit</p>
+          </div>
+        </div>
+
+        <div class="metrics-card glass-glow" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08);">
+        </div>
+      </div>
 
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 40px;">
           <div style="display: flex; flex-direction: column; gap: 20px;">

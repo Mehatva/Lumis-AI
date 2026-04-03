@@ -8,8 +8,9 @@ GRAPH_API_BASE = "https://graph.facebook.com/v19.0"
 
 class InstagramService:
 
-    def __init__(self, access_token: str = None):
+    def __init__(self, access_token: str = None, page_id: str = None):
         self.access_token = access_token or os.getenv("INSTAGRAM_ACCESS_TOKEN", "")
+        self.page_id = page_id or os.getenv("INSTAGRAM_PAGE_ID", "me")
 
     # ─── Webhook verification ──────────────────────────────────────────────
 
@@ -37,8 +38,11 @@ class InstagramService:
             for entry in payload.get("entry", []):
                 for messaging in entry.get("messaging", []):
                     sender_id = messaging.get("sender", {}).get("id")
-                    text = messaging.get("message", {}).get("text")
-                    if sender_id and text:
+                    message_obj = messaging.get("message", {})
+                    is_echo = message_obj.get("is_echo", False)
+                    text = message_obj.get("text")
+                    
+                    if sender_id and text and not is_echo:
                         messages.append({"sender_id": sender_id, "text": text})
         except Exception as e:
             print(f"[InstagramService] parse error: {e}")
@@ -58,7 +62,7 @@ class InstagramService:
             return {"error": "missing_token"}
 
         action = "typing_on" if on else "typing_off"
-        url = f"{GRAPH_API_BASE}/me/messages"
+        url = f"{GRAPH_API_BASE}/{self.page_id}/messages"
         payload = {
             "recipient": {"id": recipient_id},
             "sender_action": action
@@ -90,7 +94,7 @@ class InstagramService:
             print("[InstagramService] ERROR: No access token provided.")
             return {"error": "missing_token"}
 
-        url = f"{GRAPH_API_BASE}/me/messages"
+        url = f"{GRAPH_API_BASE}/{self.page_id}/messages"
         payload = {
             "recipient": {"id": recipient_id},
             "message": {"text": text},
@@ -123,6 +127,9 @@ class InstagramService:
         Generates the Meta OAuth URL for Instagram Messaging permissions.
         """
         app_id = os.getenv("META_APP_ID", "")
+        if not app_id:
+            raise ValueError("META_APP_ID is not configured in environment variables.")
+
         # Required scopes for Instagram Messaging
         scopes = [
             "instagram_basic",
