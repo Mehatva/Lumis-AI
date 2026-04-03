@@ -1,7 +1,7 @@
 """Instagram Graph API service — send messages and parse incoming webhooks."""
 import os
 import requests
-
+from flask import current_app
 
 GRAPH_API_BASE = "https://graph.facebook.com/v19.0"
 
@@ -65,7 +65,7 @@ class InstagramService:
                     if sender_id and text and not is_echo:
                         messages.append({"sender_id": sender_id, "text": text})
         except Exception as e:
-            print(f"[InstagramService] parse error: {e}")
+            current_app.logger.error(f"[InstagramService] parse error: {e}")
         return messages
 
     def send_typing_indicator(self, recipient_id: str, on: bool = True) -> dict:
