@@ -1,0 +1,44 @@
+{
+  "name": "The Brew Corner Café",
+  "niche": "cafe",
+  "phone": "+91 99887 65432",
+  "location": "12 Coffee Street, Indiranagar, Bangalore",
+  "location_url": "https://maps.google.com/?q=The+Brew+Corner+Bangalore",
+  "booking_url": "https://breWcorner.zomato.com",
+  "welcome_message": "Hey there! ☕ Welcome to The Brew Corner. What can I help you with?\n\nAsk me about:\n• Menu & prices\n• Timings\n• Table reservations\n• Location",
+  "tone": "casual",
+  "faqs": [
+    {
+      "question": "Menu & Prices",
+      "keywords": ["menu", "price", "cost", "coffee", "tea", "food", "drinks", "snacks", "what do you have", "kitna", "order"],
+      "response": "☕ *The Brew Corner Menu Highlights:*\n\n*Hot Beverages*\n   Espresso — ₹99\n   Cappuccino — ₹149\n   Latte — ₹169\n   Masala Chai — ₹79\n\n*Cold Beverages*\n   Cold Brew — ₹199\n   Iced Mocha — ₹189\n   Frappé — ₹179\n\n*Bites*\n   Croissant — ₹129\n   Avocado Toast — ₹249\n   Pasta — ₹299\n\nFull menu available at our counter! 🍽️",
+      "cta_label": "Reserve a Table",
+      "cta_url": "https://breWcorner.zomato.com",
+      "priority": 10
+    },
+    {
+      "question": "Table Reservation",
+      "keywords": ["reserve", "reservation", "book", "table", "seat", "booking", "party"],
+      "response": "🪑 Want to reserve a table? We'd love to have you!\n\nFor groups of 4+, reservations are recommended.\nFor smaller groups, walk-ins are always welcome! 😊",
+      "cta_label": "Reserve Now",
+      "cta_url": "https://breWcorner.zomato.com",
+      "priority": 9
+    },
+    {
+      "question": "Timings",
+      "keywords": ["timing", "timings", "open", "hours", "time", "close", "when", "kab"],
+      "response": "⏰ *The Brew Corner Timings:*\n\n📅 Monday–Friday: 8:00 AM – 10:00 PM\n📅 Saturday–Sunday: 9:00 AM – 11:00 PM\n\nPerfect for your morning coffee or a late-night study session! ✨",
+      "cta_label": null,
+      "cta_url": null,
+      "priority": 8
+    },
+    {
+      "question": "Location",
+      "keywords": ["location", "address", "where", "kahan", "directions", "map", "find", "located"],
+      "response": "📍 Find us at:\n*12 Coffee Street, Indiranagar, Bangalore*\n\nNear the 100 Feet Road junction. Look for our chalkboard sign! ☕",
+      "cta_label": "Get Directions",
+      "cta_url": "https://maps.google.com/?q=The+Brew+Corner+Bangalore",
+      "priority": 7
+    }
+  ]
+}

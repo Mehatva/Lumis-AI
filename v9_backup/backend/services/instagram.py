@@ -25,26 +25,6 @@ class InstagramService:
             return challenge
         return None
 
-    @staticmethod
-    def subscribe_app_to_page(page_id: str, page_token: str) -> bool:
-        """
-        Subscribes the Facebook Page to the App's webhooks.
-        This is required for the Page to start sending message events to our server.
-        """
-        url = f"{GRAPH_API_BASE}/{page_id}/subscribed_apps"
-        params = {
-            "access_token": page_token,
-            "subscribed_fields": "messages,messaging_postbacks,messaging_optins"
-        }
-        try:
-            r = requests.post(url, params=params, timeout=10)
-            r.raise_for_status()
-            print(f"[InstagramService] Subscribed page {page_id} to webhooks.")
-            return True
-        except Exception as e:
-            print(f"[InstagramService] Subscription error for {page_id}: {e}")
-            return False
-
     # ─── Parse incoming payload ────────────────────────────────────────────
 
     @staticmethod
@@ -147,18 +127,12 @@ class InstagramService:
         Generates the Meta OAuth URL for Instagram Messaging permissions.
         """
         app_id = os.getenv("META_APP_ID", "")
-        if not app_id:
-            raise ValueError("META_APP_ID is not configured in environment variables.")
-
         # Required scopes for Instagram Messaging
         scopes = [
-            "public_profile",
             "instagram_basic",
             "instagram_manage_messages",
             "pages_manage_metadata",
-            "pages_read_engagement",
-            "pages_show_list",
-            "business_management"
+            "pages_show_list"
         ]
         scope_str = ",".join(scopes)
         

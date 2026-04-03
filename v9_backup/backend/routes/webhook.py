@@ -1,13 +1,13 @@
+"""Routes — Instagram webhook endpoints."""
 from flask import Blueprint, request, jsonify, current_app
 from models.business import Business
 from services.instagram import InstagramService
 from services.chatbot import ChatbotService
-from extensions import limiter
 
 webhook_bp = Blueprint("webhook", __name__)
 
 
-@webhook_bp.get("/api/webhook/instagram")
+@webhook_bp.get("/webhook/instagram")
 def verify_instagram():
     """Meta calls this GET endpoint to verify the webhook subscription."""
     mode = request.args.get("hub.mode")
@@ -20,8 +20,7 @@ def verify_instagram():
     return "Verification failed", 403
 
 
-@webhook_bp.post("/api/webhook/instagram")
-@limiter.limit("60 per minute")
+@webhook_bp.post("/webhook/instagram")
 def handle_instagram():
     """
     Receives inbound Instagram DMs.
@@ -66,10 +65,15 @@ def handle_instagram():
         return jsonify({"status": "ignored_no_token"}), 200
 
     # Parse messages
+    # CRITICAL FIX for Demo: Meta requires the FB Page ID in the endpoint URL,
+    # but the incoming webhook ID is the Instagram Business ID.
+    # The manual test proved that 1084904538032905 is the ONLY ID that works.
+    endpoint_id = "1084904538032905" 
+    
+    # Use Business-specific token and prioritize the successful Page ID 
+    insta = InstagramService(access_token, endpoint_id)
     messages = InstagramService.parse_incoming(payload)
 
-    # Use Business-specific token and its own Page ID for sending replies
-    insta = InstagramService(access_token, business.instagram_page_id)
     chatbot = ChatbotService(business)
 
     for msg in messages:

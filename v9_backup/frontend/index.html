@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumis AI — The Future of Automated Customer Conversion</title>
+    <meta name="description" content="Automate your Instagram 24/7 with Lumis AI. High-end automation for premium brands.">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/landing.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="luxury-dark landing-page">
+
+<!-- Background Blobs & Texture -->
+<div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+    <div class="blob blob-5"></div>
+    <div class="grain-overlay"></div>
+</div>
+
+<!-- Navigation -->
+<nav class="navbar" id="navbar">
+    <div class="container nav-content">
+        <a href="/" class="nav-logo">
+            <div class="logo-box">
+                <div class="logo-name">Lumis AI</div>
+            </div>
+        </a>
+        <div class="nav-links" id="nav-links-guest">
+            <a href="#features" class="nav-link">Features</a>
+            <a href="#pricing" class="nav-link">Pricing</a>
+            <button onclick="App.openAuthModal('login')" class="login-btn" style="padding: 10px 24px; font-size: 0.9rem;">Sign In</button>
+        </div>
+        <div class="nav-links hidden" id="nav-links-user">
+            <a href="dashboard" class="nav-link">Dashboard</a>
+            <div class="user-profile-nav" style="display: flex; align-items: center; gap: 12px; margin-left: 10px;">
+                <span id="user-display-name" style="font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);"></span>
+                <button onclick="App.logout()" class="nav-link" style="background: transparent; border: none; cursor: pointer; padding: 0;"><i data-lucide="log-out" style="width: 18px; height: 18px;"></i></button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<header class="hero">
+    <div class="container">
+        <div class="reveal">
+            <div class="badge-premium">
+                <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i>
+                Next-Gen Automation
+            </div>
+            <h1 class="hero-title">Automate Sales.<br>Scale Your Brand.</h1>
+            <p class="hero-subtitle">Convert every Instagram inquiry into a loyal customer with our bespoke AI assistant tailored for premium businesses.</p>
+            <div class="hero-actions" id="hero-actions-guest">
+                <button onclick="App.openAuthModal('signup')" class="login-btn" style="padding: 18px 48px; font-size: 1.1rem; border-radius: 99px;">Get Started Free</button>
+                <button onclick="location.hash='#features'" class="login-btn" style="padding: 18px 48px; font-size: 1.1rem; border-radius: 99px; background: transparent; border: 1px solid var(--border-bright); color: #fff; box-shadow: none;">See Features</button>
+            </div>
+            <div class="hero-actions hidden" id="hero-actions-user">
+                <button id="hero-primary-btn" onclick="App.handleHeroAction()" class="login-btn" style="padding: 18px 48px; font-size: 1.1rem; border-radius: 99px;">Complete Your Profile</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Features Grid -->
+<section id="features" class="container" style="padding: 100px 0;">
+    <div class="section-header reveal">
+        <span class="section-tag">Capabilities</span>
+        <h2 class="section-title">Built for Performance</h2>
+    </div>
+    
+    <div class="features-grid">
+        <div class="feature-card reveal">
+            <div class="feature-icon"><i data-lucide="wand-2"></i></div>
+            <h3 class="feature-name">Magic Import</h3>
+            <p class="feature-desc">Simply enter your website URL and our AI will scrape, analyze, and build your entire knowledge base in seconds.</p>
+        </div>
+        
+        <div class="feature-card reveal" style="transition-delay: 0.1s;">
+            <div class="feature-icon"><i data-lucide="users"></i></div>
+            <h3 class="feature-name">Lead Extraction</h3>
+            <p class="feature-desc">Automatically identify and capture names, phone numbers, and intent from every conversation into a clean dashboard.</p>
+        </div>
+        
+        <div class="feature-card reveal" style="transition-delay: 0.2s;">
+            <div class="feature-icon"><i data-lucide="zap"></i></div>
+            <h3 class="feature-name">Human Handoff</h3>
+            <p class="feature-desc">AI handles the routine, but instantly flags complex inquiries for you to take over when it matters most.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing" class="pricing">
+    <div class="container">
+        <div class="section-header reveal">
+            <span class="section-tag">Investment</span>
+            <h2 class="section-title">Tailored Plans</h2>
+        </div>
+
+        <div class="pricing-grid">
+            <!-- Starter -->
+            <div class="price-card reveal">
+                <div class="plan-name">Starter</div>
+                <div class="plan-price">₹2,499<sub>/mo</sub></div>
+                <div style="font-size: 0.85rem; color: var(--accent); margin-bottom: 20px;">+ ₹1,999 setup fee</div>
+                <ul class="plan-features">
+                    <li><i data-lucide="check"></i> Basic DM automation</li>
+                    <li><i data-lucide="check"></i> Instant replies</li>
+                    <li><i data-lucide="check"></i> Simple flows</li>
+                    <li><i data-lucide="check"></i> Dashboard access</li>
+                </ul>
+                <button onclick="App.selectPlan('starter')" class="login-btn">Choose Starter</button>
+            </div>
+
+            <!-- Growth (Popular) -->
+            <div class="price-card popular reveal" style="transition-delay: 0.1s;">
+                <div class="popular-tag">MOST POPULAR</div>
+                <div class="plan-name">Growth</div>
+                <div class="plan-price">₹5,999<sub>/mo</sub></div>
+                <div style="font-size: 0.85rem; color: var(--accent); margin-bottom: 20px;">+ ₹4,999 setup fee</div>
+                <ul class="plan-features">
+                    <li><i data-lucide="check"></i> Advanced DM automation</li>
+                    <li><i data-lucide="check"></i> Smart conversation flows</li>
+                    <li><i data-lucide="check"></i> Brand-aligned responses</li>
+                    <li><i data-lucide="check"></i> Smart handoff system</li>
+                    <li><i data-lucide="check"></i> Priority support</li>
+                </ul>
+                <button onclick="App.selectPlan('growth')" class="login-btn">Choose Growth</button>
+            </div>
+
+            <!-- Scale -->
+            <div class="price-card reveal" style="transition-delay: 0.2s;">
+                <div class="plan-name">Scale</div>
+                <div class="plan-price">₹12,499<sub>/mo</sub></div>
+                <div style="font-size: 0.85rem; color: var(--accent); margin-bottom: 20px;">+ ₹9,999 setup fee</div>
+                <ul class="plan-features">
+                    <li><i data-lucide="check"></i> Full automation system</li>
+                    <li><i data-lucide="check"></i> Advanced customization</li>
+                    <li><i data-lucide="check"></i> Multi-scenario handling</li>
+                    <li><i data-lucide="check"></i> Priority escalation</li>
+                    <li><i data-lucide="check"></i> Dedicated support</li>
+                </ul>
+                <button onclick="App.selectPlan('scale')" class="login-btn">Choose Scale</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <!-- Brand Column -->
+            <div class="footer-col brand-info">
+                <div class="logo-name" style="font-size: 1.8rem; margin-bottom: 16px;">Lumis AI</div>
+                <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px;">
+                    The definitive AI automation platform for luxury brands and premium businesses.
+                </p>
+                <div style="display: flex; gap: 16px;">
+                    <a href="#" class="social-link"><i data-lucide="Instagram"></i></a>
+                    <a href="#" class="social-link"><i data-lucide="Twitter"></i></a>
+                    <a href="#" class="social-link"><i data-lucide="Linkedin"></i></a>
+                </div>
+            </div>
+
+            <!-- Product Column -->
+            <div class="footer-col">
+                <h4 class="footer-heading">Platform</h4>
+                <ul class="footer-links">
+                    <li><a href="#features">AI Features</a></li>
+                    <li><a href="#pricing">Pricing Plans</a></li>
+                    <li><a href="#">Magic Import</a></li>
+                    <li><a href="#">Human Handoff</a></li>
+                </ul>
+            </div>
+
+            <!-- Company Column -->
+            <div class="footer-col">
+                <h4 class="footer-heading">Legal</h4>
+                <ul class="footer-links">
+                    <li><a href="privacy.html">Privacy Policy</a></li>
+                    <li><a href="terms.html">Terms of Service</a></li>
+                    <li><a href="#">Security Audit</a></li>
+                    <li><a href="#">GDPR Compliance</a></li>
+                </ul>
+            </div>
+
+            <!-- Support Column -->
+            <div class="footer-col">
+                <h4 class="footer-heading">Support</h4>
+                <ul class="footer-links">
+                    <li><a href="mailto:support@lumisai.com">Contact Support</a></li>
+                    <li><a href="#">API Documentation</a></li>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">System Status</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="copyright">&copy; 2026 Lumis AI. The future of customer conversion.</div>
+            <div style="display: flex; gap: 24px;">
+                <a href="#" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem;">Status</a>
+                <a href="#" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem;">Cookies</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     AUTH OVERLAY (Ported from Dashboard)
+═══════════════════════════════════════════════════════════════════════ -->
+<div class="login-overlay hidden" id="login-overlay">
+  <div class="login-glass">
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 0;">
+        <button onclick="App.closeAuthModal()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 10px;"><i data-lucide="x"></i></button>
+    </div>
+    <div class="nav-logo" style="justify-content: center; margin-bottom: 40px; margin-top: -20px;">
+        <div class="logo-name" style="font-size: 2.4rem;">Lumis AI</div>
+    </div>
+    
+    <!-- Login Form -->
+    <form id="login-form" onsubmit="App.login(event)">
+      <input type="email" id="login-email" class="login-input" style="text-align: left;" placeholder="Email address" required />
+      <div class="input-group" style="position: relative; width: 100%;">
+        <input type="password" id="login-pass" class="login-input" style="text-align: left; padding-right: 45px;" placeholder="Password" required />
+        <button type="button" onclick="App.togglePassword('login-pass')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center;">
+          <i data-lucide="eye" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+      <button type="submit" class="login-btn">Sign In</button>
+      
+      <div class="auth-divider">
+        <span>OR</span>
+      </div>
+
+      <div class="social-login-grid">
+        <div id="google-login-btn"></div>
+        
+        <button type="button" class="social-btn apple-btn" onclick="App.socialLogin('apple')">
+          <svg viewBox="0 0 384 512" width="18" height="18" fill="currentColor" style="margin-top: -2px;"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+          Sign in with Apple
+        </button>
+        
+        <button type="button" class="social-btn instagram-btn" onclick="App.socialLogin('instagram')">
+          <i data-lucide="instagram"></i>
+          Sign in with Instagram
+        </button>
+      </div>
+
+      <div style="margin-top: 16px; font-size: 0.85rem; color: var(--muted);">
+        New here? <a href="#" onclick="App.toggleAuthMode('signup')" style="color: var(--accent); text-decoration: none;">Create an account</a>
+      </div>
+      <div id="login-error" style="color: #ef4444; margin-top: 16px; font-size: 0.85rem;"></div>
+    </form>
+
+    <!-- Signup Form -->
+    <form id="signup-form" onsubmit="App.signup(event)" style="display: none;">
+      <input type="text" id="signup-name" class="login-input" style="text-align: left;" placeholder="Your Name" required />
+      <input type="email" id="signup-email" class="login-input" style="text-align: left;" placeholder="Email address" required />
+      <div class="input-group" style="position: relative; width: 100%;">
+        <input type="password" id="signup-pass" class="login-input" style="text-align: left; padding-right: 45px;" placeholder="Create Password" required />
+        <button type="button" onclick="App.togglePassword('signup-pass')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center;">
+          <i data-lucide="eye" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+      <button type="submit" class="login-btn">Get Started</button>
+      
+      <div class="auth-divider">
+        <span>OR</span>
+      </div>
+
+      <div class="social-login-grid">
+        <div id="google-signup-btn"></div>
+        
+        <button type="button" class="social-btn apple-btn" onclick="App.socialLogin('apple')">
+          <svg viewBox="0 0 384 512" width="18" height="18" fill="currentColor" style="margin-top: -2px;"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+          Sign up with Apple
+        </button>
+        
+        <button type="button" class="social-btn instagram-btn" onclick="App.socialLogin('instagram')">
+          <i data-lucide="instagram"></i>
+          Sign up with Instagram
+        </button>
+      </div>
+      <div style="margin-top: 16px; font-size: 0.85rem; color: var(--muted);">
+        Already have an account? <a href="#" onclick="App.toggleAuthMode('login')" style="color: var(--accent); text-decoration: none;">Sign in</a>
+      </div>
+      <div style="margin-top: 24px; font-size: 0.75rem; color: var(--text-muted); line-height: 1.4;">
+        By signing up, you agree to our <a href="terms.html" style="color: var(--accent); text-decoration: underline;">Terms of Service</a> and <a href="privacy.html" style="color: var(--accent); text-decoration: underline;">Privacy Policy</a>.
+      </div>
+      <div id="signup-error" style="color: #ef4444; margin-top: 16px; font-size: 0.85rem;"></div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" style="position: fixed; bottom: 40px; right: 40px; background: #fff; color: #000; padding: 12px 24px; border-radius: 12px; font-weight: 600; opacity: 0; transform: translateY(100px); transition: all 0.4s; z-index: 20000;"></div>
+
+<script src="js/landing.js"></script>
+<script>
+  lucide.createIcons();
+</script>
+</body>
+</html>

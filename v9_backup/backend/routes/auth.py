@@ -229,21 +229,14 @@ def instagram_init():
     if not business_id:
         return jsonify({"error": "business_id is required"}), 400
         
-    try:
-        base_url = current_app.config.get("BASE_URL", "http://localhost:5001")
-        redirect_uri = f"{base_url}/api/auth/instagram/callback"
-        auth_url = InstagramService.get_auth_url(redirect_uri)
-        
-        # Store business_id in 'state' to retrieve it during callback
-        auth_url += f"&state={business_id}"
-        
-        return jsonify({"auth_url": auth_url}), 200
-    except ValueError as e:
-        current_app.logger.error(f"Instagram Init Error: {e}")
-        return jsonify({"error": str(e)}), 400
-    except Exception as e:
-        current_app.logger.error(f"Instagram Init Failed: {e}")
-        return jsonify({"error": "Failed to initialize Instagram connection. Please check server logs."}), 500
+    base_url = current_app.config.get("BASE_URL", "http://localhost:5001")
+    redirect_uri = f"{base_url}/api/auth/instagram/callback"
+    auth_url = InstagramService.get_auth_url(redirect_uri)
+    
+    # Store business_id in 'state' to retrieve it during callback
+    auth_url += f"&state={business_id}"
+    
+    return jsonify({"auth_url": auth_url}), 200
 
 
 @auth_bp.get("/api/auth/instagram/callback")
@@ -263,112 +256,51 @@ def instagram_callback():
     if not code or not business_id:
         return redirect(f"{base_url}/dashboard?instagram_error=missing_params")
 
-    try:
-        redirect_uri = f"{base_url}/api/auth/instagram/callback"
+    redirect_uri = f"{base_url}/api/auth/instagram/callback"
+    
+    # 1. Exchange code for short-lived user token
+    token_data = InstagramService.exchange_code_for_token(code, redirect_uri)
+    if "error" in token_data:
+        print(f"[OAuth Callback] Token exchange failed: {token_data}")
+        return redirect(f"{base_url}/dashboard?instagram_error=token_exchange_failed")
         
-        # 1. Exchange code for short-lived user token
-        token_data = InstagramService.exchange_code_for_token(code, redirect_uri)
-        if "error" in token_data:
-            print(f"[OAuth Callback] Token exchange failed: {token_data}")
-            return redirect(f"{base_url}/dashboard?instagram_error=token_exchange_failed")
+    short_token = token_data.get("access_token")
+    
+    # 2. Get long-lived user token
+    long_token = InstagramService.get_long_lived_token(short_token)
+    if not long_token:
+        long_token = short_token
+
+    # 3. Get managed pages for this user
+    pages = InstagramService.get_managed_pages(long_token)
+    if not pages:
+        return redirect(f"{base_url}/dashboard?instagram_error=no_pages_found")
+        
+    # Identify the first page with a linked Instagram account
+    selected_page_id = None
+    ig_business_id = None
+    page_access_token = None
+    
+    for page in pages:
+        p_id = page.get("id")
+        p_token = page.get("access_token")
+        ig_id = InstagramService.get_ig_account_for_page(p_id, p_token)
+        if ig_id:
+            selected_page_id = p_id
+            ig_business_id = ig_id
+            page_access_token = p_token
+            break
             
-        short_token = token_data.get("access_token")
+    if not ig_business_id:
+        return redirect(f"{base_url}/dashboard?instagram_error=no_ig_account_linked")
+
+    # 4. Update the business profile
+    business = Business.query.get(business_id)
+    if not business:
+        return redirect(f"{base_url}/dashboard?instagram_error=business_not_found")
         
-        # 2. Get long-lived user token
-        long_token = InstagramService.get_long_lived_token(short_token)
-        if not long_token:
-            long_token = short_token
-
-        # 3. Get managed pages for this user
-        pages = InstagramService.get_managed_pages(long_token)
-        current_app.logger.info(f"[OAuth Callback] Pages found: {len(pages) if pages else 0}")
-        
-        if not pages:
-            current_app.logger.warning("[OAuth Callback] No pages returned from Meta accounts API")
-            return redirect(f"{base_url}/dashboard?instagram_error=no_pages_found")
-            
-        # Identify the first page with a linked Instagram account
-        selected_page_id = None
-        ig_business_id = None
-        page_access_token = None
-        
-        for page in pages:
-            p_id = page.get("id")
-            p_token = page.get("access_token")
-            ig_id = InstagramService.get_ig_account_for_page(p_id, p_token)
-            if ig_id:
-                selected_page_id = p_id
-                ig_business_id = ig_id
-                page_access_token = p_token
-                break
-                
-        if not ig_business_id:
-            return redirect(f"{base_url}/dashboard?instagram_error=no_ig_account_linked")
-
-        # 4. Update the business profile
-        business = Business.query.get(business_id)
-        if not business:
-            return redirect(f"{base_url}/dashboard?instagram_error=business_not_found")
-            
-        business.instagram_page_id = ig_business_id
-        business.access_token = page_access_token
-        db.session.commit()
-        
-        # 5. AUTO-SUBSCRIBE: Tell Meta to start sending webhooks for this page
-        # This ensures the bot is "live" immediately without needing portal setup
-        InstagramService.subscribe_app_to_page(ig_business_id, page_access_token)
-
-        return redirect(f"{base_url}/dashboard?instagram_success=true")
-
-    except Exception as e:
-        print(f"[OAuth Callback] Error: {e}")
-        return redirect(f"{base_url}/dashboard?instagram_error=server_error")
-
-# ═══════════════════════════════════════════════════════════════════════
-# META COMPLIANCE: DATA DELETION CALLBACK
-# ═══════════════════════════════════════════════════════════════════════
-from services.compliance_service import ComplianceService
-
-@auth_bp.route("/api/auth/data-deletion", methods=["POST"])
-def data_deletion():
-    """
-    Data Deletion Callback for Meta Apps.
-    Meta sends a POST with signed_request when a user removes the app.
-    """
-    try:
-        signed_request = request.form.get("signed_request")
-        if not signed_request:
-            return jsonify({"error": "Missing signed_request"}), 400
-
-        data = ComplianceService.parse_signed_request(signed_request)
-        if not data:
-            return jsonify({"error": "Invalid signature"}), 400
-
-        user_id = data.get("user_id")
-        result = ComplianceService.handle_data_deletion(user_id)
-        
-        return jsonify(result), 200
-
-    except Exception as e:
-        current_app.logger.error(f"Data deletion callback failed: {e}")
-        return jsonify({"error": "Server error"}), 500
-
-@auth_bp.route("/api/auth/deletion-status/<confirmation_code>", methods=["GET"])
-def deletion_status(confirmation_code):
-    """
-    Public deletion status page for user confirmation.
-    """
-    # Simple HTML response for user transparency
-    return f"""
-    <html>
-        <head><title>Deletion Status - Lumis AI</title></head>
-        <body style="background: #050505; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif;">
-            <div style="background: rgba(255,255,255,0.05); padding: 40px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); max-width: 500px; text-align: center;">
-                <h1 style="color: #6366f1;">Request Confirmed</h1>
-                <p style="color: rgba(255,255,255,0.7);">Your data deletion request (<b>{confirmation_code}</b>) has been received and processed.</p>
-                <p style="font-size: 0.9rem; color: #666; margin-top: 20px;">All associated Meta Access Tokens and Business Intelligence have been purged.</p>
-                <a href="/" style="color: #6366f1; text-decoration: none; margin-top: 20px; display: inline-block;">Return to Lumis AI</a>
-            </div>
-        </body>
-    </html>
-    """, 200
+    business.instagram_page_id = ig_business_id
+    business.access_token = page_access_token
+    db.session.commit()
+    
+    return redirect(f"{base_url}/dashboard?instagram_success=true")
