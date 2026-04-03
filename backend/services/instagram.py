@@ -93,8 +93,16 @@ class InstagramService:
             r = requests.post(url, json=payload, params=params, timeout=10)
             r.raise_for_status()
             return r.json()
+        except requests.HTTPError as e:
+            error_details = "Unknown"
+            try:
+                error_details = r.json()
+            except:
+                error_details = r.text
+            print(f"[InstagramService] Typing indicator error: {e}. Body: {error_details}")
+            return {"error": str(e), "details": error_details}
         except Exception as e:
-            print(f"[InstagramService] Typing indicator error: {e}")
+            print(f"[InstagramService] Typing indicator unexpected error: {e}")
             return {"error": str(e)}
 
     # ─── Send message ──────────────────────────────────────────────────────
@@ -132,8 +140,8 @@ class InstagramService:
             try:
                 meta_error = r.json()
             except Exception:
-                pass
-            print(f"[InstagramService] Meta API Error: {meta_error}")
+                meta_error = r.text
+            print(f"[InstagramService] Meta API Error: {e}. Body: {meta_error}")
             return {"error": "meta_api_error", "details": meta_error}
         except requests.RequestException as e:
             print(f"[InstagramService] Network Error: {e}")

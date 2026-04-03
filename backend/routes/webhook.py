@@ -85,8 +85,11 @@ def handle_instagram():
         reply = chatbot.process(sender_id, text)
         
         # 3. Dispatch reply and turn off typing
-        insta.send_message(sender_id, reply)
+        if reply:
+            current_app.logger.warning(f"[Instagram Bot] Processed reply: {reply[:50]}...")
+            insta.send_message(sender_id, reply)
+        else:
+            current_app.logger.warning(f"[Instagram Bot] No reply generated for '{text[:20]}'")
         insta.send_typing_indicator(sender_id, on=False)
 
     return jsonify({"status": "ok"}), 200
-
