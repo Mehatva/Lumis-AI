@@ -70,22 +70,19 @@ class InstagramService:
 
     def send_typing_indicator(self, recipient_id: str, on: bool = True) -> dict:
         """
-        Send a typing indicator to a user.
-        on=True: "typing_on", on=False: "typing_off"
+        Send a typing indicator (typing_on or typing_off) to the user.
         """
         mock_mode = os.getenv("MOCK_MODE", "true").lower() == "true"
         if mock_mode:
-            print(f"[MOCK] Typing indicator {'ON' if on else 'OFF'} for {recipient_id}")
             return {"mock": True}
 
         if not self.access_token:
             return {"error": "missing_token"}
 
-        action = "typing_on" if on else "typing_off"
         url = f"{GRAPH_API_BASE}/{self.page_id}/messages"
         payload = {
             "recipient": {"id": recipient_id},
-            "sender_action": action
+            "sender_action": "typing_on" if on else "typing_off",
         }
         params = {"access_token": self.access_token}
 
@@ -99,10 +96,10 @@ class InstagramService:
                 error_details = r.json()
             except:
                 error_details = r.text
-            print(f"[InstagramService] Typing indicator error: {e}. Body: {error_details}")
+            current_app.logger.error(f"[InstagramService] Typing indicator error: {e}. Body: {error_details}")
             return {"error": str(e), "details": error_details}
         except Exception as e:
-            print(f"[InstagramService] Typing indicator unexpected error: {e}")
+            current_app.logger.error(f"[InstagramService] Typing indicator unexpected error: {e}")
             return {"error": str(e)}
 
     # ─── Send message ──────────────────────────────────────────────────────
@@ -115,11 +112,11 @@ class InstagramService:
         mock_mode = os.getenv("MOCK_MODE", "true").lower() == "true"
 
         if mock_mode:
-            print(f"\n[MOCK] → Instagram reply to {recipient_id}:\n{text}\n")
+            current_app.logger.info(f"\n[MOCK] → Instagram reply to {recipient_id}:\n{text}\n")
             return {"mock": True, "recipient_id": recipient_id, "text": text}
 
         if not self.access_token:
-            print("[InstagramService] ERROR: No access token provided.")
+            current_app.logger.error("[InstagramService] ERROR: No access token provided.")
             return {"error": "missing_token"}
 
         url = f"{GRAPH_API_BASE}/{self.page_id}/messages"
@@ -133,7 +130,9 @@ class InstagramService:
         try:
             r = requests.post(url, json=payload, params=params, timeout=10)
             r.raise_for_status()
-            return r.json()
+            res = r.json()
+            current_app.logger.warning(f"[InstagramService] SUCCESS: Message sent to {recipient_id}. Mid: {res.get('message_id')}")
+            return res
         except requests.HTTPError as e:
             # Safely attempt to parse Meta's specific JSON error response
             meta_error = "Unknown HTTP Error"
@@ -141,10 +140,10 @@ class InstagramService:
                 meta_error = r.json()
             except Exception:
                 meta_error = r.text
-            print(f"[InstagramService] Meta API Error: {e}. Body: {meta_error}")
+            current_app.logger.error(f"[InstagramService] Meta API Error: {e}. Body: {meta_error}")
             return {"error": "meta_api_error", "details": meta_error}
         except requests.RequestException as e:
-            print(f"[InstagramService] Network Error: {e}")
+            current_app.logger.error(f"[InstagramService] Network Error: {e}")
             return {"error": "network_error", "details": str(e)}
 
     # ─── OAuth Flow ────────────────────────────────────────────────────────
