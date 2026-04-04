@@ -135,12 +135,14 @@ async function loadBusinesses() {
   const overlay = document.getElementById("onboarding-overlay");
 
   if (!businesses || businesses.length === 0) {
-    console.log("No business found. Locking dashboard and showing CTA.");
+    console.log("No business found. Locking dashboard and auto-launching onboarding.");
     document.body.classList.add("dashboard-locked");
     if (ctaContainer) ctaContainer.classList.remove("hidden");
     if (pricingSection) pricingSection.classList.add("hidden");
     if (overlay) overlay.classList.add("hidden");
-    Toast.show("Welcome! Complete your profile to unlock Lumis AI. ✨", "info", 5000);
+    
+    // Auto-launch the onboarding popup immediately
+    App.onboardStart();
   } else {
     State.businesses = businesses;
     const b = businesses[0];
