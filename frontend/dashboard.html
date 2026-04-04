@@ -562,10 +562,13 @@
       <input type="text" id="faq-question" class="login-input" style="text-align: left;" placeholder="Internal Label" required />
       <input type="text" id="faq-keywords" class="login-input" style="text-align: left;" placeholder="Triggers (comma separated)" required />
       <textarea id="faq-response" class="login-input" style="text-align: left; height: 100px;" placeholder="System Response" required></textarea>
-      <div style="display: flex; gap: 16px;">
-         <input type="text" id="faq-cta-label" class="login-input" style="text-align: left;" placeholder="CTA Label" />
-         <input type="url" id="faq-cta-url" class="login-input" style="text-align: left;" placeholder="CTA URL" />
-      </div>
+       <div style="display: flex; flex-direction: column; gap: 8px;">
+         <div style="display: flex; gap: 16px;">
+            <input type="text" id="faq-cta-label" class="login-input" style="text-align: left;" placeholder="Action Button Text (e.g., Shop Now)" />
+            <input type="url" id="faq-cta-url" class="login-input" style="text-align: left;" placeholder="Action Button Link (e.g., https://store.com)" />
+         </div>
+         <p style="font-size: 0.75rem; color: var(--text-muted); opacity: 0.8; margin: 0; padding-left: 4px;">💡 <strong>Pro Tip:</strong> Adding these will create a clickable button in the AI's response to guide customers.</p>
+       </div>
       <div style="display: flex; justify-content: flex-end; gap: 16px; margin-top: 16px;">
          <button type="button" class="login-btn" style="background: transparent; color: #fff; width: auto;" onclick="App.closeFaqModal()">Close</button>
          <button type="submit" class="login-btn" style="width: auto; padding: 0 40px;">Finalize</button>
