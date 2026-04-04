@@ -71,6 +71,7 @@ class InstagramService:
     def send_typing_indicator(self, recipient_id: str, on: bool = True) -> dict:
         """
         Send a typing indicator (typing_on or typing_off) to the user.
+        Uses the '/me/messages' endpoint which is more robust for Page tokens.
         """
         mock_mode = os.getenv("MOCK_MODE", "true").lower() == "true"
         if mock_mode:
@@ -79,7 +80,8 @@ class InstagramService:
         if not self.access_token:
             return {"error": "missing_token"}
 
-        url = f"{GRAPH_API_BASE}/{self.page_id}/messages"
+        # Use 'me' instead of explicit ID to ensure the token's context is used
+        url = f"{GRAPH_API_BASE}/me/messages"
         payload = {
             "recipient": {"id": recipient_id},
             "sender_action": "typing_on" if on else "typing_off",
@@ -107,7 +109,7 @@ class InstagramService:
     def send_message(self, recipient_id: str, text: str) -> dict:
         """
         Send a text message to a user via the Instagram Messaging API.
-        In MOCK_MODE, this just prints the message.
+        Uses the '/me/messages' endpoint.
         """
         mock_mode = os.getenv("MOCK_MODE", "true").lower() == "true"
 
@@ -119,13 +121,18 @@ class InstagramService:
             current_app.logger.error("[InstagramService] ERROR: No access token provided.")
             return {"error": "missing_token"}
 
-        url = f"{GRAPH_API_BASE}/{self.page_id}/messages"
+        # Use 'me/messages' for Page Tokens
+        url = f"{GRAPH_API_BASE}/me/messages"
         payload = {
             "recipient": {"id": recipient_id},
             "message": {"text": text},
             "messaging_type": "RESPONSE",
         }
         params = {"access_token": self.access_token}
+
+        # Log token prefix for debugging (securely)
+        token_prefix = self.access_token[:10] if self.access_token else "NONE"
+        current_app.logger.info(f"[InstagramService] Attempting send to {recipient_id} using token {token_prefix}...")
 
         try:
             r = requests.post(url, json=payload, params=params, timeout=10)
@@ -134,7 +141,6 @@ class InstagramService:
             current_app.logger.warning(f"[InstagramService] SUCCESS: Message sent to {recipient_id}. Mid: {res.get('message_id')}")
             return res
         except requests.HTTPError as e:
-            # Safely attempt to parse Meta's specific JSON error response
             meta_error = "Unknown HTTP Error"
             try:
                 meta_error = r.json()
