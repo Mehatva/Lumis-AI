@@ -137,7 +137,7 @@ async function loadBusinesses() {
   if (!businesses || businesses.length === 0) {
     console.log("No business found. Locking dashboard and auto-launching onboarding.");
     document.body.classList.add("dashboard-locked");
-    if (ctaContainer) ctaContainer.classList.remove("hidden");
+    if (ctaContainer) ctaContainer.classList.add("hidden"); // Keep hidden to avoid redundancy
     if (pricingSection) pricingSection.classList.add("hidden");
     if (overlay) overlay.classList.add("hidden");
     
