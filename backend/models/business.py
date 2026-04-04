@@ -64,7 +64,7 @@ class Business(db.Model):
             "credits_used": self.credits_used,
             "credits_limit": self.credits_limit,
             "support_mode": self.support_mode,
-            "is_trained": bool(self.knowledge_base),
+            "is_trained": bool(self.knowledge_base) or (len(self.faqs) > 0),
             "is_meta_connected": bool(self.access_token and self.instagram_page_id),
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
