@@ -964,6 +964,7 @@ button:active { transform: scale(0.96) !important; }
   padding: 16px 24px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   cursor: pointer;
   transition: all 0.3s;

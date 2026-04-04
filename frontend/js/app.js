@@ -691,8 +691,8 @@ const App = {
         </div>
         
         <div style="display: flex; gap: 12px; margin-top: 40px; border-top: 1px solid var(--border); padding-top: 24px;">
-           <button class="luxury-btn small-btn" style="width: auto; padding: 0 20px; font-size: 0.8rem; height: 38px;" onclick="App.openFaqModal(${f.id})">Edit</button>
-           <button class="luxury-btn small-btn danger-btn" style="width: auto; padding: 0 20px; font-size: 0.8rem; height: 38px;" onclick="App.deleteFaq(${f.id})">Remove</button>
+           <button class="luxury-btn small-btn" style="width: auto; font-size: 0.8rem; height: 38px;" onclick="App.openFaqModal(${f.id})">Edit</button>
+           <button class="luxury-btn small-btn danger-btn" style="width: auto; font-size: 0.8rem; height: 38px;" onclick="App.deleteFaq(${f.id})">Remove</button>
         </div>
       </div>`;
   },
