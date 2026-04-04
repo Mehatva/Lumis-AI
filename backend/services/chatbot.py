@@ -4,6 +4,7 @@ Handles: intent detection, FAQ matching, lead capture state machine,
          response building, and AI fallback orchestration.
 """
 import re
+from flask import current_app
 from models import db
 from models.faq import FAQ
 from models.lead import Lead
