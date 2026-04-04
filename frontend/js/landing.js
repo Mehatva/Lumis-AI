@@ -212,11 +212,14 @@ const App = {
             });
             const data = await r.json();
             
-            const hasBusiness = data.businesses && data.businesses.length > 0;
-            this.updateUIForUser(user, hasBusiness);
+            const businesses = data.businesses || [];
+            const hasBusiness = businesses.length > 0;
+            const isComplete = hasBusiness && businesses[0].is_trained && businesses[0].is_meta_connected;
+
+            this.updateUIForUser(user, hasBusiness, isComplete);
             this._hasBusiness = hasBusiness;
         } catch (e) {
-            console.error("Session check failed:", e);
+            console.warn('[Landing] Session verification failed:', e);
             this.updateUIForGuest();
         }
     },
@@ -226,23 +229,39 @@ const App = {
         document.getElementById("nav-links-user").classList.add("hidden");
         document.getElementById("hero-actions-guest").classList.remove("hidden");
         document.getElementById("hero-actions-user").classList.add("hidden");
-    },
-
-    updateUIForUser(user, hasBusiness) {
-        document.getElementById("nav-links-guest").classList.add("hidden");
-        document.getElementById("nav-links-user").classList.remove("hidden");
-        document.getElementById("hero-actions-guest").classList.add("hidden");
-        document.getElementById("hero-actions-user").classList.remove("hidden");
-        
-        document.getElementById("user-display-name").textContent = `Welcome, ${user.name || 'User'}`;
         
         const primaryBtn = document.getElementById("hero-primary-btn");
-        if (hasBusiness) {
-            primaryBtn.textContent = "Complete Your Profile";
-            primaryBtn.onclick = () => window.location.href = "/dashboard";
-        } else {
-            primaryBtn.textContent = "Get Started Free";
+        if (primaryBtn) {
+            primaryBtn.textContent = "Get Started";
             primaryBtn.onclick = () => this.openAuthModal('signup');
+        }
+    },
+
+    updateUIForUser(user, hasBusiness, isComplete) {
+        // Update nav
+        document.getElementById("nav-links-guest").classList.add("hidden");
+        document.getElementById("nav-links-user").classList.remove("hidden");
+        
+        // Show user-specific actions
+        const guestActions = document.getElementById('hero-actions-guest');
+        const userActions = document.getElementById('hero-actions-user');
+        
+        if (guestActions) guestActions.classList.add('hidden');
+        if (userActions) userActions.classList.remove('hidden');
+
+        // Update welcome message
+        const welcomeMsg = document.getElementById('hero-welcome-msg') || document.getElementById("user-display-name");
+        if (welcomeMsg) welcomeMsg.textContent = `Welcome, ${user.first_name || user.name || 'User'}!`;
+
+        // Update primary button
+        const primaryBtn = document.getElementById("hero-primary-btn");
+        if (primaryBtn) {
+            if (isComplete) {
+                primaryBtn.textContent = "Go to Dashboard";
+            } else {
+                primaryBtn.textContent = "Complete Your Profile";
+            }
+            primaryBtn.onclick = () => window.location.href = "/dashboard";
         }
 
         lucide.createIcons();
@@ -254,9 +273,6 @@ const App = {
         
         if (input.type === 'password') {
             input.type = 'text';
-            // Update icon to eye-off if needed, but let's keep it simple for now
-            // since we don't have a direct reference to the icon element easily here
-            // without additional DOM traversal. 
         } else {
             input.type = 'password';
         }
@@ -268,7 +284,7 @@ const App = {
     },
 
     handleHeroAction() {
-        if (this._hasBusiness) {
+        if (sessionStorage.getItem("chatiq_token")) {
             window.location.href = "/dashboard";
         } else {
             this.openAuthModal('signup');
@@ -452,6 +468,7 @@ const App = {
 // ─── SCROLL EFFECTS ───
 window.addEventListener('scroll', () => {
     const nav = document.getElementById("navbar");
+    if (!nav) return;
     if (window.scrollY > 50) {
         nav.classList.add("scrolled");
     } else {

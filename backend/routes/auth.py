@@ -317,6 +317,8 @@ def instagram_callback():
             
         business.instagram_page_id = ig_business_id
         business.access_token = page_access_token
+        business.instagram_user_token = long_token
+        business.token_updated_at = datetime.utcnow()
         db.session.commit()
         
         # 5. AUTO-SUBSCRIBE

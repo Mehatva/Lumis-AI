@@ -14,7 +14,9 @@ class Business(db.Model):
     booking_url = db.Column(db.String(512))
     instagram_page_id = db.Column(db.String(64))
     instagram_handle = db.Column(db.String(100))
-    access_token = db.Column(db.Text)                         # per-business Instagram token
+    access_token = db.Column(db.Text)                         # per-business Instagram Page Token (Permanent)
+    instagram_user_token = db.Column(db.Text)                # Long-lived User Token (60 days)
+    token_updated_at = db.Column(db.DateTime, default=datetime.utcnow)
     welcome_message = db.Column(db.Text, default="Hi! How can I help you today? 😊")
     tone = db.Column(db.String(30), default="friendly")       # friendly / professional / casual
     plan = db.Column(db.String(20), default="trial")          # trial / starter / growth / pro

@@ -10,6 +10,8 @@ from utils.auth_utils import business_owned, faq_owned
 from models.faq import FAQ
 from models.lead import Lead
 from models.conversation import Conversation
+from services.instagram import InstagramService
+from datetime import datetime, timedelta
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
@@ -45,10 +47,36 @@ def create_business():
     return jsonify(business.to_dict()), 201
 
 
+def refresh_instagram_token_if_needed(business):
+    """
+    Silently refreshes the long-lived Instagram user token if it's older than 30 days.
+    """
+    if not business.instagram_user_token or not business.token_updated_at:
+        return
+
+    # Check if token is older than 30 days
+    if datetime.utcnow() - business.token_updated_at > timedelta(days=30):
+        try:
+            print(f"[Silent Refresh] Refreshing token for business {business.id}...")
+            new_token_data = InstagramService.refresh_long_lived_token(business.instagram_user_token)
+            
+            if new_token_data and "access_token" in new_token_data:
+                business.instagram_user_token = new_token_data["access_token"]
+                business.token_updated_at = datetime.utcnow()
+                db.session.commit()
+                print(f"[Silent Refresh] Successfully refreshed token for business {business.id}")
+            else:
+                print(f"[Silent Refresh] Failed to refresh token for business {business.id}: {new_token_data}")
+        except Exception as e:
+            print(f"[Silent Refresh] Error refreshing token for business {business.id}: {str(e)}")
+
+
 @dashboard_bp.get("/api/businesses/<int:business_id>")
 @jwt_required()
 @business_owned
 def get_business(business_id, business=None):
+    # Silently refresh Instagram token if needed
+    refresh_instagram_token_if_needed(business)
     return jsonify(business.to_dict())
 
 

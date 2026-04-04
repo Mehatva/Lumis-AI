@@ -284,3 +284,25 @@ class InstagramService:
         except Exception as e:
             print(f"[InstagramService] IG details lookup error: {e}")
             return {}
+
+    @staticmethod
+    def refresh_long_lived_token(old_token: str) -> dict:
+        """
+        Refreshes a long-lived user access token.
+        Can be done once every day to keep it fresh for another 60 days.
+        """
+        url = f"{GRAPH_API_BASE}/oauth/access_token"
+        params = {
+            "grant_type": "fb_exchange_token",
+            "client_id": current_app.config.get("FB_APP_ID"),
+            "client_secret": current_app.config.get("FB_APP_SECRET"),
+            "fb_exchange_token": old_token
+        }
+        
+        try:
+            r = requests.get(url, params=params, timeout=10)
+            r.raise_for_status()
+            return r.json()
+        except Exception as e:
+            print(f"[InstagramService] Silent refresh error: {e}")
+            return {}
