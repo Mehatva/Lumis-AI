@@ -18,7 +18,15 @@
     }
   </script>
 </head>
-<body class="luxury-dark dashboard-locked">
+<body class="luxury-dark">
+
+<!-- Initial Loading Overlay -->
+<div id="initial-loader" class="loading-overlay">
+  <div class="loader-content">
+    <div class="pulse-loader"></div>
+    <div class="loader-text">LUMIS AI</div>
+  </div>
+</div>
 
 <!-- Background Design Elements -->
 <div class="bg-blobs">
@@ -31,7 +39,7 @@
      LOGIN OVERLAY
      A high-end entry point that sets the tone for the product.
 ═══════════════════════════════════════════════════════════════════════ -->
-<div class="app-container">
+<div class="app-container" style="opacity: 0; transition: opacity 0.5s ease-in-out;">
   <!-- ─── SETUP JOURNEY CTA (Visible when Locked) ─── -->
   <div id="setup-cta-container" class="hidden">
     <div class="setup-cta-glass">

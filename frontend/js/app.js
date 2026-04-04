@@ -161,6 +161,18 @@ async function loadBusinesses() {
     }
   }
 
+  // REVEAL UI: Hide loader and fade in app
+  const loader = document.getElementById("initial-loader");
+  if (loader) {
+    loader.classList.add("fade-out");
+    setTimeout(() => {
+      loader.remove();
+      document.body.classList.add("body-ready");
+    }, 500);
+  } else {
+    document.body.classList.add("body-ready");
+  }
+
   const select = document.getElementById("business-select");
   select.innerHTML = State.businesses.map(
     (b) => `<option value="${b.id}">${b.name}</option>`
