@@ -11,6 +11,8 @@ from models.lead import Lead
 from models.conversation import Conversation
 from services.ai_service import AIService
 from services.email_service import EmailService
+import random
+import traceback
 
 
 class IntentDetector:
@@ -247,20 +249,32 @@ class ChatbotService:
                 "We look forward to helping you!"
             )
 
-        conv = self.get_or_create_conversation(session_id)
-        conv.add_message("user", user_message)
+        try:
+            conv = self.get_or_create_conversation(session_id)
+            conv.add_message("user", user_message)
+        except Exception as e:
+            current_app.logger.error(f"[Chatbot] DB/Conversation Failure for {self.business.name}: {str(e)}")
+            # If the database is entirely down, we return the fallback immediately
+            return (
+                f"We're having a minor connection issue! 😊\n"
+                f"Please call us directly at *{self.business.phone or 'our office'}* for immediate assistance."
+            )
 
         # 0. Ensure a lead placeholder exists for tracking
-        lead = Lead.query.filter_by(business_id=self.business.id, sender_id=session_id).first()
-        if not lead:
-            lead = Lead(
-                business_id=self.business.id,
-                platform="instagram",
-                sender_id=session_id,
-                note=f"First contact: {user_message[:50]}..."
-            )
-            db.session.add(lead)
-            db.session.commit()
+        try:
+            lead = Lead.query.filter_by(business_id=self.business.id, sender_id=session_id).first()
+            if not lead:
+                lead = Lead(
+                    business_id=self.business.id,
+                    platform="instagram",
+                    sender_id=session_id,
+                    note=f"First contact: {user_message[:50]}..."
+                )
+                db.session.add(lead)
+                db.session.commit()
+        except Exception as e:
+            current_app.logger.warning(f"[Chatbot] Failed to ensure lead record: {str(e)}")
+            lead = None # Continue anyway, lead tracking isn't fatal to the user experience
 
         # 1. Handle active lead capture flow
         if conv.state in ("capture_name", "capture_phone", "confirm_details"):
@@ -295,22 +309,32 @@ class ChatbotService:
             return reply
 
         # 4. Personalized AI Response (RAG)
-        faqs = FAQ.query.filter_by(business_id=self.business.id).all()
-        history = conv.get_messages()
-        reply = self.ai.get_reply(history, user_message, faqs)
+        try:
+            faqs = FAQ.query.filter_by(business_id=self.business.id).all()
+            history = conv.get_messages()
+            reply = self.ai.get_reply(history, user_message, faqs)
+        except Exception as e:
+            current_app.logger.error(f"[Chatbot] AI Service Error for {self.business.name}: {str(traceback.format_exc())}")
+            reply = (
+                "I'm sorry, I'm experiencing a minor technical delay with my AI brain. 🧠\n"
+                "I've notified our team to jump in and help you directly! 🙏"
+            )
 
-        # 5. Intelligence: Flag for human attention if it's an AI fallback
-        if "personally flagged this" in reply:
-            lead.needs_attention = True
+        # 5. Intelligence: Flag for human attention if it's an AI fallback or if lead capture exists
+        if lead:
+            if "personally flagged this" in reply or "AI brain" in reply:
+                lead.needs_attention = True
+            
+            # Update note with latest activity if name isn't set yet
+            if not lead.name:
+                lead.note = f"Latest activity: {user_message[:50]}..."
         
-        # Update note with latest activity if name isn't set yet
-        if not lead.name:
-            lead.note = f"Latest activity: {user_message[:50]}..."
-
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
 
         # Append a light CTA nudge randomly (~15%)
-        import random
         if self.business.booking_url and random.random() < 0.15:
             reply += f"\n\n💬 Have more questions? Just ask!"
 

@@ -480,6 +480,78 @@
   <!-- ─── PAGE: HELP & SUPPORT ─── -->
   <section class="page" id="page-help">
     <div style="display: flex; flex-direction: column; gap: 40px; max-width: 900px; margin: 0 auto; padding: 20px 0;">
+
+      <!-- ─── META REVIEWER COMMAND CENTER (NEW) ─── -->
+      <div class="bento-card" style="padding: 48px; border: 2px solid var(--accent); background: linear-gradient(135deg, rgba(20, 184, 166, 0.1), transparent); position: relative; overflow: hidden;">
+        <div style="position: absolute; top: -20px; right: -20px; width: 120px; height: 120px; background: var(--accent); filter: blur(60px); opacity: 0.2;"></div>
+        
+        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 40px;">
+           <div style="width: 56px; height: 56px; background: #000; border: 1px solid var(--accent); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--accent); box-shadow: 0 0 20px var(--accent-glow);">
+              <i data-lucide="shield-check" style="width: 28px; height: 28px;"></i>
+           </div>
+           <div>
+              <h2 style="font-family: var(--font-heading); font-size: 2rem; font-weight: 800; color: #fff; letter-spacing: -0.02em;">Reviewer Command Center</h2>
+              <p style="color: var(--accent); font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">Official Meta App Review Resources</p>
+           </div>
+        </div>
+
+        <div class="grid-split-66-33" style="gap: 32px; align-items: stretch;">
+          <!-- Left: Testing Commands -->
+          <div style="display: flex; flex-direction: column; gap: 24px;">
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px;">
+              <i data-lucide="terminal" style="width: 18px; height: 18px; color: var(--muted);"></i>
+              Magic Testing Commands
+            </h3>
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 16px; overflow: hidden;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.02);">
+                    <th style="padding: 16px; text-align: left; color: var(--muted); border-bottom: 1px solid var(--border);">Type this phrase...</th>
+                    <th style="padding: 16px; text-align: left; color: var(--muted); border-bottom: 1px solid var(--border);">Expected AI Behavior</th>
+                    <th style="padding: 16px; text-align: center; border-bottom: 1px solid var(--border);">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="padding: 16px; color: #fff; font-family: monospace; font-weight: 700;">"Help"</td>
+                    <td style="padding: 16px; color: var(--text-secondary);">Triggers standard FAQ response.</td>
+                    <td style="padding: 16px; text-align: center;">
+                      <button onclick="App.copyToClipboard('Help')" class="luxury-btn" style="padding: 6px 12px; font-size: 0.7rem; width: auto; display: inline-flex;">Copy</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 16px; color: #fff; font-family: monospace; font-weight: 700;">"Talk to Human"</td>
+                    <td style="padding: 16px; color: var(--text-secondary);">Mutes AI & flags conversation.</td>
+                    <td style="padding: 16px; text-align: center;">
+                      <button onclick="App.copyToClipboard('Talk to Human')" class="luxury-btn" style="padding: 6px 12px; font-size: 0.7rem; width: auto; display: inline-flex;">Copy</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Right: Quick Actions -->
+          <div style="display: flex; flex-direction: column; gap: 24px;">
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff;">Quick Actions</h3>
+            
+            <div class="luxury-btn" style="padding: 20px; border: 1px solid var(--accent-glow); cursor: pointer;" onclick="App.toggleSupportMode()">
+              <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="display: flex; gap: 12px; align-items: center;">
+                  <i data-lucide="user-cog" style="color: var(--accent-rose);"></i>
+                  <span style="font-size: 0.85rem;">Test Human Mode</span>
+                </div>
+                <div id="guide-support-mode-dot" class="status-dot" style="background: #3f3f46;"></div>
+              </div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 12px; border: 1px dashed var(--border);">
+              <p style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">Reviewer Screencast URL:</p>
+              <input type="text" placeholder="Paste recording link here..." style="width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; outline: none; border-color: var(--accent-glow);">
+            </div>
+          </div>
+        </div>
+      </div>
       
       <!-- Meta Connection Guide -->
       <div class="bento-card" style="padding: 48px; border: 1px solid var(--accent-glow); background: rgba(20, 184, 166, 0.03);">

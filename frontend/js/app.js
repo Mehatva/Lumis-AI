@@ -235,6 +235,13 @@ function updateSidebarMeta() {
       }
     }
 
+    // Sync Reviewer Guide dot
+    const guideSupportDot = document.getElementById("guide-support-mode-dot");
+    if (guideSupportDot) {
+      guideSupportDot.style.background = b.support_mode ? "var(--accent-rose)" : "#3f3f46";
+      guideSupportDot.style.boxShadow = b.support_mode ? "0 0 10px var(--accent-rose)" : "none";
+    }
+
     // Dashboard Overview "Service Status" card
     const igCard = document.getElementById("ig-connection-card");
     if (igCard) {
@@ -321,6 +328,16 @@ const App = {
       darkIcon.style.display = "block";
       lightIcon.style.display = "none";
     }
+  },
+
+  // ─── Utilities ───
+  copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      Toast.show(`Copied: "${text}"`, "success");
+    }).catch(err => {
+      console.error("Failed to copy:", err);
+      Toast.show("Copy failed", "error");
+    });
   },
 
   // ─── Onboarding (Hybrid Flow) ───
@@ -968,18 +985,25 @@ const App = {
   _updateSupportModeUI(isActive) {
     const toggle = document.getElementById("support-mode-toggle");
     const knob = document.getElementById("support-mode-knob");
-    if (!toggle || !knob) return;
+    const guideDot = document.getElementById("guide-support-mode-dot");
+    
+    if (toggle && knob) {
+      if (isActive) {
+        toggle.style.background = "var(--accent-rose)";
+        toggle.style.borderColor = "rgba(244, 63, 94, 0.4)";
+        knob.style.left = "24px";
+        knob.style.background = "#fff";
+      } else {
+        toggle.style.background = "rgba(255,255,255,0.05)";
+        toggle.style.borderColor = "rgba(255,255,255,0.1)";
+        knob.style.left = "3px";
+        knob.style.background = "var(--muted)";
+      }
+    }
 
-    if (isActive) {
-      toggle.style.background = "var(--accent-rose)";
-      toggle.style.borderColor = "rgba(244, 63, 94, 0.4)";
-      knob.style.left = "24px";
-      knob.style.background = "#fff";
-    } else {
-      toggle.style.background = "rgba(255,255,255,0.05)";
-      toggle.style.borderColor = "rgba(255,255,255,0.1)";
-      knob.style.left = "3px";
-      knob.style.background = "var(--muted)";
+    if (guideDot) {
+      guideDot.style.background = isActive ? "var(--accent-rose)" : "#3f3f46";
+      guideDot.style.boxShadow = isActive ? "0 0 10px var(--accent-rose)" : "none";
     }
   },
 

@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app
+import traceback
 from models.business import Business
 from services.instagram import InstagramService
 from services.chatbot import ChatbotService
@@ -66,7 +67,11 @@ def handle_instagram():
         return jsonify({"status": "ignored_no_token"}), 200
 
     # Parse messages
-    messages = InstagramService.parse_incoming(payload)
+    try:
+        messages = InstagramService.parse_incoming(payload)
+    except Exception as e:
+        current_app.logger.error(f"[Webhook] Failed to parse incoming payload: {str(e)}")
+        return jsonify({"status": "error_parsing"}), 200
 
     # Use Business-specific token and its own Page ID for sending replies
     insta = InstagramService(access_token, business.instagram_page_id)
@@ -76,20 +81,35 @@ def handle_instagram():
         sender_id = msg["sender_id"]
         text = msg["text"]
 
-        # 1. Send typing indicator to create a natural feeling
-        insta.send_typing_indicator(sender_id, on=True)
+        try:
+            # 1. Send typing indicator to create a natural feeling
+            insta.send_typing_indicator(sender_id, on=True)
 
-        current_app.logger.info(f"[Live Webhook] From {sender_id} to Page {page_id}: {text}")
+            current_app.logger.info(f"[Live Webhook] From {sender_id} to Page {page_id}: {text}")
 
-        # 2. Generate response using AI engine
-        reply = chatbot.process(sender_id, text)
-        
-        # 3. Dispatch reply and turn off typing
-        if reply:
-            current_app.logger.warning(f"[Instagram Bot] Processed reply: {reply[:50]}...")
-            insta.send_message(sender_id, reply)
-        else:
-            current_app.logger.warning(f"[Instagram Bot] No reply generated for '{text[:20]}'")
-        insta.send_typing_indicator(sender_id, on=False)
+            # 2. Generate response using AI engine
+            # We wrap this specifically because AI or DB lookups are the most likely failure points
+            try:
+                reply = chatbot.process(sender_id, text)
+            except Exception as e:
+                current_app.logger.error(f"[Chatbot] Process Error for {business.name}: {str(traceback.format_exc())}")
+                reply = "I'm sorry, I'm experiencing a minor technical delay. I've notified our team to jump in and help you directly! 🙏"
+
+            # 3. Dispatch reply and turn off typing
+            if reply:
+                current_app.logger.warning(f"[Instagram Bot] Processed reply: {reply[:50]}...")
+                insta.send_message(sender_id, reply)
+            else:
+                current_app.logger.warning(f"[Instagram Bot] No reply generated for '{text[:20]}'")
+            
+            insta.send_typing_indicator(sender_id, on=False)
+
+        except Exception as e:
+            current_app.logger.error(f"[Webhook Loop] Critical failure in message loop: {str(traceback.format_exc())}")
+            # Try once more to send a fallback if the loop itself crashed
+            try:
+                insta.send_message(sender_id, "I'm having a technical moment. My team has been alerted! 🙏")
+            except:
+                pass
 
     return jsonify({"status": "ok"}), 200
