@@ -310,12 +310,16 @@ def instagram_callback():
         if not business:
             return redirect(f"{base_url}/dashboard?instagram_error=business_not_found")
             
+        # 4b. Fetch IG account details (username)
+        ig_details = InstagramService.get_ig_account_details(ig_business_id, page_access_token)
+        if ig_details and "username" in ig_details:
+            business.instagram_handle = f"@{ig_details['username']}"
+            
         business.instagram_page_id = ig_business_id
         business.access_token = page_access_token
         db.session.commit()
         
-        # 5. AUTO-SUBSCRIBE: Tell Meta to start sending webhooks for this page
-        # This ensures the bot is "live" immediately without needing portal setup
+        # 5. AUTO-SUBSCRIBE
         InstagramService.subscribe_app_to_page(ig_business_id, page_access_token)
 
         return redirect(f"{base_url}/dashboard?instagram_success=true")

@@ -13,6 +13,7 @@ class Business(db.Model):
     location_url = db.Column(db.String(512))
     booking_url = db.Column(db.String(512))
     instagram_page_id = db.Column(db.String(64))
+    instagram_handle = db.Column(db.String(100))
     access_token = db.Column(db.Text)                         # per-business Instagram token
     welcome_message = db.Column(db.Text, default="Hi! How can I help you today? 😊")
     tone = db.Column(db.String(30), default="friendly")       # friendly / professional / casual
@@ -48,6 +49,7 @@ class Business(db.Model):
             "location_url": self.location_url,
             "booking_url": self.booking_url,
             "instagram_page_id": self.instagram_page_id,
+            "instagram_handle": self.instagram_handle,
             "welcome_message": self.welcome_message,
             "tone": self.tone,
             "plan": self.plan,

@@ -266,3 +266,21 @@ class InstagramService:
         except Exception as e:
             print(f"[InstagramService] IG account lookup error: {e}")
             return ""
+
+    @staticmethod
+    def get_ig_account_details(ig_id: str, token: str) -> dict:
+        """
+        Fetches details (like username) for a specific Instagram Business account.
+        """
+        url = f"{GRAPH_API_BASE}/{ig_id}"
+        params = {
+            "fields": "username,name",
+            "access_token": token
+        }
+        try:
+            r = requests.get(url, params=params, timeout=10)
+            r.raise_for_status()
+            return r.json()
+        except Exception as e:
+            print(f"[InstagramService] IG details lookup error: {e}")
+            return {}

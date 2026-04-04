@@ -168,6 +168,24 @@
         </div>
       </a>
 
+      <!-- PERSISTENT CONNECTION HINT (NEW) -->
+      <div id="ig-connection-card" class="bento-card hidden" style="background: linear-gradient(135deg, rgba(20, 184, 166, 0.05), rgba(99, 102, 241, 0.05)); border: 1px solid rgba(20, 184, 166, 0.2); display: flex; align-items: center; justify-content: space-between; padding: 24px 32px;">
+        <div style="display: flex; align-items: center; gap: 20px;">
+          <div style="width: 52px; height: 52px; background: var(--accent-emerald); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 8px 16px rgba(16, 185, 129, 0.2);">
+            <i data-lucide="instagram" style="width: 26px; height: 26px;"></i>
+          </div>
+          <div>
+            <div style="font-size: 0.7rem; font-weight: 800; color: var(--accent-emerald); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Service Active</div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: #fff; letter-spacing: -0.01em;">Instagram Messenger Linked</div>
+            <p id="ig-card-handle" style="font-size: 0.85rem; color: var(--accent-emerald); font-weight: 700; margin-top: 4px;">@active_account</p>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 8px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+          <div class="status-dot-pulsing" style="background: var(--accent-emerald); width: 8px; height: 8px;"></div>
+          <span style="font-size: 0.85rem; font-weight: 600; color: var(--muted);">AI Automation Live</span>
+        </div>
+      </div>
+
       <!-- Row 2: Leads & Correctness -->
       <div class="grid-split-50" style="gap: 24px;">
         <a href="javascript:void(0)" class="bento-card stat-widget accent-glow link-card" id="hero-leads-card" onclick="App.loadPage('leads')" style="display: block; text-decoration: none; cursor: pointer;">
@@ -406,17 +424,30 @@
            </div>
            
            <div id="oauth-container" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 16px; padding: 40px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 24px;">
-              <div style="max-width: 400px;">
-                <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 12px;">Automatic Onboarding</h4>
-                <p style="font-size: 0.9rem; color: var(--muted); line-height: 1.6;">Connect your Instagram Business account in seconds. Lumis AI will automatically handle the API handshakes and webhook subscriptions.</p>
+              <div id="ig-connect-prompt">
+                <div style="max-width: 400px;">
+                  <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 12px;">Automatic Onboarding</h4>
+                  <p style="font-size: 0.9rem; color: var(--muted); line-height: 1.6;">Connect your Instagram Business account in seconds. Lumis AI will automatically handle the API handshakes and webhook subscriptions.</p>
+                </div>
+                
+                <button onclick="App.connectInstagram()" class="login-btn" style="background: #1877F2; width: auto; padding: 14px 32px; display: flex; align-items: center; gap: 12px; font-weight: 700; border-radius: 12px; box-shadow: 0 4px 14px rgba(24, 119, 242, 0.3); margin: 24px auto 0;">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                  Connect with Facebook
+                </button>
+              </div>
+
+              <!-- CONNECTED STATE (NEW) -->
+              <div id="ig-connected-state" class="hidden">
+                 <div style="width: 64px; height: 64px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent-emerald); margin: 0 auto 20px;">
+                    <i data-lucide="check-circle" style="width: 32px; height: 32px;"></i>
+                 </div>
+                  <h4 style="font-size: 1.25rem; font-weight: 800; color: #fff; margin-bottom: 8px;">Account Verified</h4>
+                  <p style="color: var(--accent-emerald); font-weight: 700; margin-bottom: 12px; font-size: 1rem;">Linked as: <span id="ig-account-name">@loading...</span></p>
+                  <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 24px;">Your Instagram account is successfully linked and being managed by Lumis AI.</p>
+                 <button onclick="App.connectInstagram()" class="luxury-btn" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: var(--muted); font-size: 0.85rem; padding: 10px 20px;">Relink Account</button>
               </div>
               
-              <button onclick="App.connectInstagram()" class="login-btn" style="background: #1877F2; width: auto; padding: 14px 32px; display: flex; align-items: center; gap: 12px; font-weight: 700; border-radius: 12px; box-shadow: 0 4px 14px rgba(24, 119, 242, 0.3);">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                Connect with Facebook
-              </button>
-              
-              <button onclick="document.getElementById('manual-integration').classList.toggle('hidden')" style="background: transparent; border: none; color: var(--muted); font-size: 0.8rem; text-decoration: underline; cursor: pointer;">Advanced: Manual Configuration</button>
+              <button id="manual-btn" onclick="document.getElementById('manual-integration').classList.toggle('hidden')" style="background: transparent; border: none; color: var(--muted); font-size: 0.8rem; text-decoration: underline; cursor: pointer;">Advanced: Manual Configuration</button>
            </div>
         
            <div id="manual-integration" class="hidden" style="margin-top: 32px; padding-top: 32px; border-top: 1px solid var(--border);">

@@ -208,8 +208,9 @@ function updateSidebarMeta() {
     }
     
     if (metaDot) {
+      metaDot.className = b.is_meta_connected ? "status-dot-pulsing" : "status-dot";
       metaDot.style.background = b.is_meta_connected ? "var(--accent-emerald)" : "#3f3f46";
-      metaDot.style.boxShadow = b.is_meta_connected ? "0 0 10px var(--accent-emerald)" : "none";
+      metaDot.style.boxShadow = b.is_meta_connected ? "0 0 15px var(--accent-emerald)" : "none";
     }
 
     if (supportContainer) {
@@ -217,6 +218,55 @@ function updateSidebarMeta() {
         supportContainer.classList.remove("hidden");
       } else {
         supportContainer.classList.add("hidden");
+      }
+    }
+
+    // Dashboard Overview "Service Status" card
+    const igCard = document.getElementById("ig-connection-card");
+    if (igCard) {
+      if (b.is_meta_connected) {
+        igCard.classList.remove("hidden");
+      } else {
+        igCard.classList.add("hidden");
+      }
+    }
+
+    // Settings "Instagram Integration" badge & state
+    const badge = document.getElementById("ig-status-badge");
+    const connectPrompt = document.getElementById("ig-connect-prompt");
+    const connectedState = document.getElementById("ig-connected-state");
+    const manualBtn = document.getElementById("manual-btn");
+
+    if (badge) {
+      if (b.is_meta_connected) {
+        badge.textContent = "CONNECTED";
+        badge.style.background = "rgba(16, 185, 129, 0.15)";
+        badge.style.color = "var(--accent-emerald)";
+        badge.style.borderColor = "rgba(16, 185, 129, 0.3)";
+      } else {
+        badge.textContent = "READY TO CONNECT";
+        badge.style.background = "rgba(255, 255, 255, 0.05)";
+        badge.style.color = "var(--muted)";
+        badge.style.borderColor = "var(--border)";
+      }
+    }
+
+    if (connectPrompt && connectedState) {
+      if (b.is_meta_connected) {
+        connectPrompt.classList.add("hidden");
+        connectedState.classList.remove("hidden");
+        if (manualBtn) manualBtn.classList.add("hidden");
+        
+        // Update handles
+        const handle = b.instagram_handle || "@connected_account";
+        const settingsHandle = document.getElementById("ig-account-name");
+        const dashboardHandle = document.getElementById("ig-card-handle");
+        if (settingsHandle) settingsHandle.textContent = handle;
+        if (dashboardHandle) dashboardHandle.textContent = handle;
+      } else {
+        connectPrompt.classList.remove("hidden");
+        connectedState.classList.add("hidden");
+        if (manualBtn) manualBtn.classList.remove("hidden");
       }
     }
   }
@@ -407,6 +457,9 @@ const App = {
       mainContent.style.opacity = "1";
       mainContent.style.transform = "translateY(0)";
     }
+
+    // ENSURE UI SYNC
+    updateSidebarMeta();
     
     // Refresh icons for new content
     if (window.lucide) lucide.createIcons();
