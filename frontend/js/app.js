@@ -554,7 +554,7 @@ const App = {
     const b = State.currentBusiness;
     if (!statusEl || !b) return;
 
-    if (b.knowledge_base) {
+    if (b.is_trained) {
       statusEl.textContent = "AI Specialized";
       statusEl.style.color = "var(--accent-emerald)";
       if (lastTrainedEl && b.last_trained_at) {
